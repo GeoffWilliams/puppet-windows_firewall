@@ -1,0 +1,18 @@
+{
+  "name": "geoffwilliams-windows_firewall",
+  "version": "0.1.0",
+  "author": "geoffwilliams",
+  "summary": "Manage the windows firwall with Puppet (netsh)",
+  "license": "Apache-2.0",
+  "source": "https://github.com/GeoffWilliams/puppet-windows_firewall.git",
+  "project_page": null,
+  "issues_url": "https://api.github.com/repos/GeoffWilliams/puppet-windows_firewall/issues{/number}",
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": ">= 1.0.0"
+    }
+  ],
+  "data_provider": null,
+  "project_url": "https://github.com/GeoffWilliams/puppet-windows_firewall.git"
+}
