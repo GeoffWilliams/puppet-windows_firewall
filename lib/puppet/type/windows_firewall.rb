@@ -21,6 +21,13 @@ Puppet::Type.newtype(:windows_firewall) do
     newvalues(:yes, :no)
   end
 
+  newproperty(:description) do
+    desc "Description of this rule"
+    munge do |value|
+      value.downcase
+    end
+  end
+
   newproperty(:direction) do
     desc "Direction the rule applies to (In/Out)"
     newvalues(:in, :out)
