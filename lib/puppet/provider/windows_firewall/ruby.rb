@@ -44,6 +44,7 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
   # Each rule is se
   def self.parse_rule(input)
     rule = {}
+    last_key = nil
     input.split("\n").reject { |line|
       line =~ /---/
     }.each { |line|
@@ -58,8 +59,6 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
         # downcase all values for comparison purposes
         value = line_split[1].strip.downcase
 
-        #rule[key_name(key)] = value
-
         # puppet blows up if the namevar isn't called `name` despite what you choose to expose this
         # to the user as in the type definition...
         safe_key = (key == :rule_name) ? :name : key
@@ -72,6 +71,17 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
         end
 
         rule[safe_key] = munged_value
+        last_key = safe_key
+
+      else
+        # probably looking at the protocol type/code - we only support ONE of these per rule
+        # since the CLI only lets us set one (although the GUI has no limit). Because of looping
+        # this will return the _last_ item in the list
+        if last_key == :protocol
+          line_split = line.strip.split(/\s+/, 2)
+          rule[:protocol_type] = line_split[0]
+          rule[:protocol_code] = line_split[1]
+        end
       end
     }
 
