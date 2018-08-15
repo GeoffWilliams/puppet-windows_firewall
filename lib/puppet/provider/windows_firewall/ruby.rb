@@ -112,8 +112,14 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
       @resource.properties.reject { |property|
         property.to_s == "ensure"
       }.each { |property|
-        property_name = property.to_s
-        args << "#{property_name}=\"#{@resource[property_name.to_sym]}\""
+        # netsh uses `profiles` when listing but the setter argument for cli is `profile`, all
+        # other setter/getter names are symmetrical
+        property_name = (property.name == :profiles)? "profile" : property.name.to_s
+
+        # flatten any arrays to comma deliminted lists (usually for `profile`)
+        property_value = (property.value.instance_of?(Array)) ? property.value.join(",") : property.value
+
+        args << "#{property_name}=\"#{property_value}\""
       }
       cmd = "#{command(:cmd)} advfirewall firewall add rule name=\"#{@resource[:name]}\" #{args.join(' ')}"
       output = execute(cmd).to_s

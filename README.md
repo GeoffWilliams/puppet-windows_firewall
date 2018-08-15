@@ -62,7 +62,7 @@ windows_firewall { "my cool rule":
 If a rule with the same name but different properties already exists, it will be deleted and re-created to
 ensure it is defined correctly. To delete a rule, set `ensure => absent`.
 
-# Managing ICMP
+### Managing ICMP
 ```puppet
 windows_firewall { "Puppet - All ICMP V4":
   direction => "in",
@@ -71,24 +71,35 @@ windows_firewall { "Puppet - All ICMP V4":
 }
 ```
 
-# Managing Ports
+### Managing Ports
 
 ```puppet
-windows_firewall { "Puppet - Open SQL Server Port 1433":
+windows_firewall { "Puppet - Open a range of ports":
   direction => "in",
   action    => "allow",
   protocol  => "tcp",
-  localport => 1433,
+  localport => "1000-2000",
 }
 ```
 
-# Managing Programs
+### Managing Programs
 
 ```puppet
 windows_firewall { "Puppet - Allow Messenger":
   direction => "in",
   action    => "allow",
   program   => "C:\\programfiles\\messenger\\msnmsgr.exe",
+}
+```
+
+### Creating rules in specific profiles
+```shy
+windows_firewall { "Puppet - Open a port in specific profiles":
+  direction => "in",
+  action    => "allow",
+  protocol  => "tcp",
+  profiles  => ["private", "domain"],
+  localport => "666",
 }
 ```
 

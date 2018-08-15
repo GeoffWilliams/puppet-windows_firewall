@@ -33,9 +33,9 @@ Puppet::Type.newtype(:windows_firewall) do
     newvalues(:in, :out)
   end
 
-  newproperty(:profiles) do
-    desc "Which profile(s) this rule belongs to (Domain/Private/Public)"
-    newvalues(:domain, :private, :public)
+  newproperty(:profiles, :array_matching=>:all) do
+    desc "Which profile(s) this rule belongs to, use an array to pass more then one"
+    newvalues(:domain, :private, :public, :any)
   end
 
   newproperty(:grouping) do
@@ -57,6 +57,13 @@ Puppet::Type.newtype(:windows_firewall) do
     end
   end
 
+  newproperty(:protocol_type_code) do
+    desc "Some protocols (ICMP) can be restricted by type/code"
+    munge do |value|
+      value.downcase
+    end
+  end
+
   newproperty(:localport) do
     desc "the local port the rule targets"
   end
@@ -67,6 +74,7 @@ Puppet::Type.newtype(:windows_firewall) do
 
   newproperty(:edge_traversal) do
     desc "Apply rule to encapsulated traffic (?) - see: https://serverfault.com/questions/89824/windows-advanced-firewall-what-does-edge-traversal-mean#89846"
+    newvalues(:yes, :deferapp, :deferuser, :no)
   end
 
   newproperty(:action) do
@@ -83,13 +91,12 @@ Puppet::Type.newtype(:windows_firewall) do
 
   newproperty(:interfacetypes) do
     desc "Interface types this rule applies to"
+    newvalues(:wireless, :lan, :ras, :any)
   end
 
   newproperty(:security) do
     desc "Security that applies to this rule"
-    munge do |value|
-      value.downcase
-    end
+    newvalues(:authenticate, :authenc, :authdynenc, :authnoencap, :notrequired)
   end
 
   newproperty(:rule_source) do

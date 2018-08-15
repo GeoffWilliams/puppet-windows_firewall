@@ -1,7 +1,7 @@
 #@PDQTest
-windows_firewall { "Puppet - Open SQL Server Port 1433":
+windows_firewall { "Puppet - Open a range of ports":
   direction => "in",
   action    => "allow",
   protocol  => "tcp",
-  localport => 1433,
+  localport => "1000-2000",
 }
