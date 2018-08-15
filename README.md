@@ -114,6 +114,27 @@ bundle exec puppet strings
 
 ## Limitations
 * Requires the `netsh advfirewall` command
+* The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
+  however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
+  individual rules if for each type you wish to allow if you want to limit a rule in this way, eg:
+  
+  ```puppet
+  windows_firewall { "Allow ICMP echo":
+    ensure        => present,
+    protocol      => "ICMPv4",
+    protocol_type => "8",
+    protocol_code => "any",
+    action        => "allow",
+  }
+
+  windows_firewall { "Allow ICMP time exceeded":
+    ensure        => present,
+    protocol      => "ICMPv4",
+    protocol_type => "11",
+    protocol_code => "any",
+    action        => "allow",
+  }
+  ```   
 
 ## Development
 

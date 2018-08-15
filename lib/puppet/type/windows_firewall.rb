@@ -57,12 +57,20 @@ Puppet::Type.newtype(:windows_firewall) do
     end
   end
 
-  newproperty(:protocol_type_code) do
-    desc "Some protocols (ICMP) can be restricted by type/code"
+  newproperty(:protocol_type) do
+    desc "protocol type to use (with ICMPv4/ICMPv6)"
     munge do |value|
       value.downcase
     end
   end
+
+  newproperty(:protocol_code) do
+    desc "protocol code to use (with ICMPv4/ICMPv6)"
+    munge do |value|
+      value.downcase
+    end
+  end
+
 
   newproperty(:localport) do
     desc "the local port the rule targets"
