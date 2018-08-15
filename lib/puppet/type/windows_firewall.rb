@@ -45,9 +45,9 @@ Puppet::Type.newtype(:windows_firewall) do
 
   newproperty(:protocol) do
     desc "the protocol the rule targets"
-    # munge do |value|
-    #   value.downcase
-    # end
+    munge do |value|
+      value.downcase
+    end
   end
 
   newproperty(:localport) do
@@ -67,12 +67,37 @@ Puppet::Type.newtype(:windows_firewall) do
     newvalues(:block, :allow)
   end
 
+  newproperty(:program) do
+    desc "Path to program this rule applies to"
+    munge do |value|
+      value.downcase
+    end
+  end
+
+  newproperty(:interfacetypes) do
+    desc "Interface types this rule applies to"
+  end
+
+  newproperty(:security) do
+    desc "Security that applies to this rule"
+    munge do |value|
+      value.downcase
+    end
+  end
+
+  newproperty(:rule_source) do
+    desc "Where this rule originated"
+    munge do |value|
+      value.downcase
+    end
+  end
+
   newparam(:name) do
     desc "Name of this rule"
     isnamevar
-    # munge do |value|
-    #   value.downcase
-    # end
+    munge do |value|
+      value.downcase
+    end
   end
 
   # # see "title patterns" - https://www.craigdunn.org/2016/07/composite-namevars-in-puppet/

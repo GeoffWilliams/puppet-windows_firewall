@@ -47,7 +47,10 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
     input.split("\n").reject { |line|
       line =~ /---/
     }.each { |line|
-      line_split = line.split(":")
+      # split at most twice - there will be more then one colon if we have path to a program here
+      # eg:
+      #   Program: C:\foo.exe
+      line_split = line.split(":", 2)
 
       if line_split.size == 2
         key = key_name(line_split[0].strip)
@@ -83,7 +86,7 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
     rules = []
 
     # each rule is separated by a double newline, we can that parse each one individually
-    execute([command(:cmd), "advfirewall", "firewall", "show", "rule", "all"]).to_s.split("\n\n").each do |line|
+    execute([command(:cmd), "advfirewall", "firewall", "show", "rule", "all", "verbose"]).to_s.split("\n\n").each do |line|
       rules << parse_rule(line)
     end
 
