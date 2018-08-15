@@ -100,18 +100,4 @@ Puppet::Type.newtype(:windows_firewall) do
     end
   end
 
-  # # see "title patterns" - https://www.craigdunn.org/2016/07/composite-namevars-in-puppet/
-  # def self.title_patterns
-  #   [
-  #       # just a regular title (no '=') - assign it to the name field
-  #       [ /(^([^\=]*)$)/m,
-  #         [ [:name] ] ],
-  #
-  #       # Title is in form key=value - assign LHS of = to name, RHS to value
-  #       [ /^([^=]+)=(.*)$/,
-  #         [ [:name], [:value] ]
-  #       ]
-  #   ]
-  # end
-
 end
