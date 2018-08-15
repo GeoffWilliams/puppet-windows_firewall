@@ -24,44 +24,14 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
     @property_hash[:ensure] == :present
   end
 
+  # all work done in `flush()` method
   def create()
-    puts @property_hash
-    #netsh advfirewall firewall add rule name="Open SQL Server Port 1433" dir=in action=allow protocol=TCP localport=1433
-    #execute([command(:cmd), "advfirewall", "firewall", "delete", "rule", "name=\"#{@resource[:name]}\""])
-
-
-    puts "CREATE!"
-    #
-    # # sysctl -w
-    # execute([command(:cmd), "-w", "#{@resource[:name]}=#{@resource[:value]}"])
-    #
-    # remove_definitions()
-    #
-    # # save setting to 80-puppet-*.conf file
-    # File.open(self.get_filename(@resource[:name]), 'w') { |file| file.write(to_file(@resource[:name], @resource[:value])) }
-    #
-    # if @resource[:autoflush_ipv4] and @resource[:name] =~ /ipv4/
-    #   Puppet.notice("Flusihing IPV4 rules")
-    #   execute([command(:cmd), "-w", "net.ipv4.route.flush=1"])
-    # end
-    #
-    # if @resource[:autoflush_ipv6] and @resource[:name] =~ /ipv6/
-    #   Puppet.notice("Flusihing IPV6 rules")
-    #   execute([command(:cmd), "-w", "net.ipv6.route.flush=1"])
-    # end
-    #
-    # # Disabled due to https://github.com/GeoffWilliams/puppet-sysctl/issues/1
-    # #rebuild_initrd
   end
 
+  # all work done in `flush()` method
   def destroy()
-    # delete the existing rule...
-    puts "destroy"
-    execute([command(:cmd), "advfirewall", "firewall", "delete", "rule", "name=#{@resource[:name]}"])
-
-    # ...and mark all properties as flushed
-    @property_hash = {}
   end
+
 
   # create a normalised key name by:
   # 1. lowercasing input
@@ -118,98 +88,23 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
     end
 
     rules.collect { |hash| new(hash) }
-
-
-
-
-    # # for a systemctl setting to be "managed" we need an entry in a file and also
-    # # a matching directive
-    #
-    # active = {}
-    # sysctl_values = {}
-    #
-    # # corresponding entries from sysctl -a that are managed by puppet
-    # execute([command(:cmd), "-a" ]).to_s.split("\n").reject { |line|
-    #   line =~ /^\s*$/ or line !~ /=/
-    # }.each { |line|
-    #   split = line.split('=')
-    #   if split.count == 2
-    #     name = split[0].strip
-    #     value = split[1].strip
-    #     sysctl_values[name] = value
-    #
-    #     file = self.get_filename(name)
-    #     if File.exist?(file)
-    #       s = File.read(file).split("=")
-    #       value_saved =
-    #           if s.count == 2
-    #             s[1].strip.gsub(/\n/,"")
-    #           else
-    #             nil
-    #           end
-    #
-    #       active[name] = {:ensure => :present, :value => value, :value_saved => value_saved, :defined_in => [file]}
-    #     end
-    #   end
-    # }
-    #
-    # # scan every place we are allowed to define entries
-    # Dir.glob([
-    #              "/run/sysctl.d/*.conf",
-    #              "/etc/sysctl.d/*.conf",
-    #              "/usr/local/lib/sysctl.d/*.conf",
-    #              "/usr/lib/sysctl.d/*.conf",
-    #              "/lib/sysctl.d/*.conf",
-    #              "/etc/sysctl.conf"
-    #          ]
-    # ).reject { |file|
-    #   # reject our own files. There is a link 99-sysctl.conf -> /etc/sysctl.conf so we are scanning that too
-    #   file =~ /#{PUPPET_PREFIX}/
-    # }.each { |file|
-    #   File.readlines(file).reject {|line|
-    #     # skip entirely whitespace or comment lines
-    #     line =~ /^(s*|\s*#.*)$/
-    #   }.each { |line|
-    #     split = line.split("=")
-    #     if split.count == 2
-    #       key = split[0].strip
-    #       value_saved = split[1].strip
-    #
-    #       # it's possible for same setting to be defined in multiple files - we need to capture this so that all of them
-    #       # can be moved out of the way
-    #       if active.key?(key)
-    #         active[key][:defined_in] << file
-    #         active[key][:value_saved] = value_saved
-    #       else
-    #         active[key] = {:ensure => :present, :value => sysctl_values[key], :value_saved => value_saved, :defined_in => [file]}
-    #       end
-    #     end
-    #
-    #   }
-    # }
-    #
-    # active.collect { |k,v|
-    #   new({
-    #           :name => k,
-    #           :ensure => v[:ensure],
-    #           :value => v[:value],
-    #           :value_saved => v[:value_saved],
-    #           :defined_in => v[:defined_in]
-    #       })
-    # }
-
   end
 
-  # When does flush fire?
-  # 1. When there are changes to a resource that exists
-  # 2. When a resource is ensured=>absent
-  # It does NOT run when a resource does not yet exist (but `create()` does...)
   def flush
     # @property_hash contains the `IS` values (thanks Gary!)... For new rules there is no `IS`, there is only the
     # `SHOULD`. The setter methods from `mk_resource_methods` (or manually created) won't be called either. You have
     # to inspect @resource instead
+
+    # we are flushing an existing resource to either update it or ensure=>absent it
+    # therefore, delete this rule now and create a new one if needed
+    if @property_hash[:ensure] == :present
+      Puppet.notice("(windows_firewall) deleting rule '#{@resource[:name]}'")
+      cmd = "#{command(:cmd)} advfirewall firewall delete rule name=\"#{@resource[:name]}\""
+      output = execute(cmd).to_s
+    end
+
     if @resource[:ensure] == :present
-      puts ">>>>>>>> commit rule"
+      Puppet.notice("(windows_firewall) adding rule '#{@resource[:name]}'")
       args = []
       @resource.properties.reject { |property|
         property.to_s == "ensure"
@@ -217,12 +112,7 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
         property_name = property.to_s
         args << "#{property_name}=\"#{@resource[property_name.to_sym]}\""
       }
-
-      Puppet.notice("(windows_firewall) adding rule '#{@resource[:name]}'")
-      #cmd = [command(:cmd), "advfirewall", "firewall", "add", "rule", "name=\"#{@resource[:name]}\""] + args
-
       cmd = "#{command(:cmd)} advfirewall firewall add rule name=\"#{@resource[:name]}\" #{args.join(' ')}"
-      puts cmd
       output = execute(cmd).to_s
       Puppet.notice("...#{output}")
     end

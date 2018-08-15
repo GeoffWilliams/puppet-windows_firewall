@@ -18,7 +18,6 @@ Puppet::Type.newtype(:windows_firewall) do
 
   newproperty(:enabled) do
     desc "Whether the rule is enabled (Yes or No)"
-    isrequired
     newvalues(:yes, :no)
   end
 
