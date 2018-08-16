@@ -15,6 +15,7 @@ Manage the windows firewall with Puppet (netsh).
 
 ## Features
 * Create/edit/delete individual firewall rules (`windows_firewall_rule`)
+* Enable/disable firewall groups (`windows_firewall_group`)
 
 ## Usage
 
