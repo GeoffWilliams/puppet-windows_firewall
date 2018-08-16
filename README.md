@@ -123,6 +123,25 @@ windows_firewall { "puppet - open port in specific profiles":
 }
 ```
 
+### Purging rules
+
+You can choose to purge unmanaged rules from the system (be careful! - this will remove _any_ rule that is not manged by
+Puppet including those created by Windows itself):
+
+```puppet
+resources { "windows_firewall":
+  purge => true,
+}
+
+windows_firewall { "puppet - allow all":
+  ensure    => present,
+  direction => "in",
+  action    => "allow",
+  protocol  => "tcp",
+  localport => "any",
+}
+```
+
 ## Reference
 [generated documentation](https://rawgit.com/GeoffWilliams/puppet-windows_firewall/master/doc/index.html).
 

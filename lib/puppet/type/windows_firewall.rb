@@ -120,6 +120,10 @@ Puppet::Type.newtype(:windows_firewall) do
     munge do |value|
       value.downcase
     end
+    validate do |value|
+      # it is not allowed to have a rule called "any"
+      value.downcase != "any"
+    end
   end
 
 end

@@ -98,10 +98,18 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
     rules = []
 
     # each rule is separated by a double newline, we can that parse each one individually
-    execute([command(:cmd), "advfirewall", "firewall", "show", "rule", "all", "verbose"]).to_s.split("\n\n").each do |line|
-      rules << parse_rule(line)
+    begin
+      execute([command(:cmd), "advfirewall", "firewall", "show", "rule", "all", "verbose"]).to_s.split("\n\n").each do |line|
+        rules << parse_rule(line)
+      end
+    rescue Puppet::ExecutionFailure => e
+      # if there are no rules (maybe someone purged them...) then the command will fail with
+      # the message below. In this case we can ignore the error and just zero the list of rules
+      # parsed
+      if e.message =~ /No rules match the specified criteria/
+        rules = []
+      end
     end
-
     rules.collect { |hash| new(hash) }
   end
 
@@ -141,7 +149,7 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
       }
       cmd = "#{command(:cmd)} advfirewall firewall add rule name=\"#{@resource[:name]}\" #{args.join(' ')}"
       output = execute(cmd).to_s
-      Puppet.notice("...#{output}")
+      Puppet.debug("...#{output}")
     end
   end
 
