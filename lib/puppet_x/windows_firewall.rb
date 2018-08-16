@@ -2,7 +2,6 @@ require 'puppet_x'
 module PuppetX
   module WindowsFirewall
 
-
     # create a normalised key name by:
     # 1. lowercasing input
     # 2. converting spaces to underscores
@@ -107,6 +106,54 @@ module PuppetX
     end
 
 
+    # Each rule is se
+    def self.parse_profile(input)
+      profile = {}
+      first_line = true
+      profile_name = "__error__"
+      input.split("\n").reject { |line|
+        line =~ /---/ || line =~ /^\s*$/
+      }.each { |line|
+        if first_line
+          # take the first word in the line - eg "public profile settings" -> "public"
+          profile_name = line.split(" ")[0].downcase
+          first_line = false
+        else
+
+          # split each line at most twice by first glob of whitespace
+          line_split = line.split(/\s+/, 2)
+
+          if line_split.size == 2
+            key = key_name(line_split[0].strip)
+
+            # downcase all values for comparison purposes
+            value = line_split[1].strip.downcase
+
+            profile[key] = value
+          end
+        end
+      }
+
+      # if we see the rule then it must exist...
+      profile[:name] = profile_name
+
+      Puppet.debug "Parsed windows firewall profile: #{profile}"
+      profile
+    end
+
+
+    # parse firewall profiles
+    def self.profiles(cmd)
+      profiles = []
+      # the output of `show allprofiles` contains several blank lines that make parsing somewhat
+      # harder so just run it for each of the three profiles to make life easy...
+      ["publicprofile", "domainprofile", "privateprofile"].each { |profile|
+        profiles <<  parse_profile(Puppet::Util::Execution.execute([cmd, "advfirewall", "show", profile]).to_s)
+      }
+      profiles
+    end
+
   end
 end
+
 
