@@ -141,6 +141,31 @@ module PuppetX
       profile
     end
 
+    # Each rule is se
+    def self.parse_global(input)
+      globals = {}
+      input.split("\n").reject { |line|
+        line =~ /---/ || line =~ /^\s*$/
+      }.each { |line|
+
+        # split each line at most twice by first glob of whitespace
+        line_split = line.split(/\s+/, 2)
+
+        if line_split.size == 2
+          key = key_name(line_split[0].strip)
+
+          # downcase all values for comparison purposes
+          value = line_split[1].strip.downcase
+
+          globals[key] = value
+        end
+      }
+
+      globals[:name] = "global"
+
+      Puppet.debug "Parsed windows firewall globals: #{globals}"
+      globals
+    end
 
     # parse firewall profiles
     def self.profiles(cmd)
@@ -153,6 +178,17 @@ module PuppetX
       profiles
     end
 
+
+    # parse firewall profiles
+    def self.globals(cmd)
+      profiles = []
+      # the output of `show allprofiles` contains several blank lines that make parsing somewhat
+      # harder so just run it for each of the three profiles to make life easy...
+      ["publicprofile", "domainprofile", "privateprofile"].each { |profile|
+        profiles <<  parse_global(Puppet::Util::Execution.execute([cmd, "advfirewall", "show", "global"]).to_s)
+      }
+      profiles
+    end
   end
 end
 

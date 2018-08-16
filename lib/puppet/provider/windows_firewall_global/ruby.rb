@@ -1,0 +1,48 @@
+require 'puppet_x'
+require 'puppet_x/windows_firewall'
+
+Puppet::Type.type(:windows_firewall_global).provide(:windows_firewall_global, :parent => Puppet::Provider) do
+  confine :osfamily => :windows
+  mk_resource_methods
+  desc "Windows Firewall global settings"
+
+  commands :cmd => "netsh"
+
+  def self.prefetch(resources)
+    instances.each do |prov|
+      if resource = resources[prov.name]
+        resource.provider = prov
+      end
+    end
+  end
+
+  # global settings always exist
+  def exists?
+    true
+  end
+
+  # all work done in `flush()` method
+  def create()
+  end
+
+  # all work done in `flush()` method
+  def destroy()
+  end
+
+
+  def self.instances
+    PuppetX::WindowsFirewall.globals(command(:cmd)).collect { |hash| new(hash) }
+  end
+
+  def flush
+    # @property_hash contains the `IS` values (thanks Gary!)... For new rules there is no `IS`, there is only the
+    # `SHOULD`. The setter methods from `mk_resource_methods` (or manually created) won't be called either. You have
+    # to inspect @resource instead
+
+    # Puppet.notice("(windows_firewall) global settings '#{@resource[:name]}' enabled: #{@resource[:enabled]}")
+    # cmd = "#{command(:cmd)} advfirewall firewall set rule group=\"#{@resource[:name]}\" new enable=\"#{@resource[:enabled]}\""
+    # output = execute(cmd).to_s
+    # Puppet.debug("...#{output}")
+  end
+
+end

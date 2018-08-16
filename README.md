@@ -185,6 +185,9 @@ bundle exec puppet strings
 ## Limitations
 * Requires the `netsh advfirewall` command
 * Rule names are lowercased for comparison purposes
+* Property names match those used by netsh so there is inconsistency in the equivalent puppet
+  property names (some names are run-together, others separated by underscores). This is
+  deliberate and makes the module code much simpler as names map exactly
 * It is not possible to edit the `grouping` for rules (netsh does not support this)
 * The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
   however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
