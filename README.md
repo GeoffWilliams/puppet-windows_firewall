@@ -14,7 +14,7 @@
 Manage the windows firewall with Puppet (netsh).
 
 ## Features
-* Create/edit/delete individual firewall rules
+* Create/edit/delete individual firewall rules (`windows_firewall_rule`)
 
 ## Usage
 
@@ -23,8 +23,8 @@ Manage the windows firewall with Puppet (netsh).
 The type and provider is able to enumerate the firewall rules existing on the system:
 
 ```shell
-C:\>puppet resource windows_firewall
-windows_firewall { 'branchcache content retrieval (http-in)':
+C:\>puppet resource windows_firewall_rule
+windows_firewall_rule { 'branchcache content retrieval (http-in)':
   ensure         => 'present',
   action         => 'allow',
   direction      => 'in',
@@ -38,7 +38,7 @@ windows_firewall { 'branchcache content retrieval (http-in)':
   remoteip       => 'any',
   remoteport     => 'any',
 }
-windows_firewall { 'branchcache content retrieval (http-out)':
+windows_firewall_rule { 'branchcache content retrieval (http-out)':
   ensure         => 'present',
   action         => 'allow',
   direction      => 'out',
@@ -48,7 +48,7 @@ windows_firewall { 'branchcache content retrieval (http-out)':
 You can limit output to a single rule by passing its name as an argument, eg:
 
 ```shell
-C:\>puppet resource windows_firewall 'puppet - rule'
+C:\>puppet resource windows_firewall_rule 'puppet - rule'
 ```
 
 ### Ensuring a rule
@@ -56,7 +56,7 @@ C:\>puppet resource windows_firewall 'puppet - rule'
 The basic syntax for ensuring rules is: 
 
 ```puppet
-windows_firewall { "name of rule":
+windows_firewall_rule { "name of rule":
   ensure => present,
   ...
 }
@@ -67,7 +67,7 @@ ensure it is defined correctly. To delete a rule, set `ensure => absent`.
 
 ### Managing ICMP
 ```puppet
-windows_firewall { "puppet - all icmpv4":
+windows_firewall_rule { "puppet - all icmpv4":
   ensure    => present,
   direction => "in",
   action    => "allow",
@@ -77,7 +77,7 @@ windows_firewall { "puppet - all icmpv4":
 
 You can also create a rule that only allows a specific ICMP type and code:
 ```puppet
-windows_firewall { "puppet - allow icmp echo":
+windows_firewall_rule { "puppet - allow icmp echo":
   ensure        => present,
   direction     => "in",
   action        => "allow",
@@ -94,7 +94,7 @@ Use the `localport` and `remoteport` properties to set the ports a rule refers t
 individual port or a range.
 
 ```puppet
-windows_firewall { "puppet - allow ports 1000-2000":
+windows_firewall_rule { "puppet - allow ports 1000-2000":
   ensure    => present,
   direction => "in",
   action    => "allow",
@@ -106,7 +106,7 @@ windows_firewall { "puppet - allow ports 1000-2000":
 ### Managing Programs
 
 ```puppet
-windows_firewall { "puppet - allow messenger":
+windows_firewall_rule { "puppet - allow messenger":
   ensure    => present,
   direction => "in",
   action    => "allow",
@@ -116,7 +116,7 @@ windows_firewall { "puppet - allow messenger":
 
 ### Creating rules in specific profiles
 ```puppet
-windows_firewall { "puppet - open port in specific profiles":
+windows_firewall_rule { "puppet - open port in specific profiles":
   ensure    => present,
   direction => "in",
   action    => "allow",
@@ -132,11 +132,11 @@ You can choose to purge unmanaged rules from the system (be careful! - this will
 Puppet including those created by Windows itself):
 
 ```puppet
-resources { "windows_firewall":
+resources { "windows_firewall_rule":
   purge => true,
 }
 
-windows_firewall { "puppet - allow all":
+windows_firewall_rule { "puppet - allow all":
   ensure    => present,
   direction => "in",
   action    => "allow",
@@ -175,7 +175,7 @@ bundle exec puppet strings
     action        => "allow",
   }
 
-  windows_firewall { "Allow ICMP time exceeded":
+  windows_firewall_rule { "Allow ICMP time exceeded":
     ensure        => present,
     protocol      => "ICMPv4",
     protocol_type => "11",

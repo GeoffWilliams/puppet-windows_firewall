@@ -1,5 +1,5 @@
 #@PDQTest
-windows_firewall { "puppet - allow icmp echo":
+windows_firewall_rule { "puppet - allow icmp echo":
   ensure        => present,
   direction     => "in",
   action        => "allow",

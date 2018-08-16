@@ -1,5 +1,5 @@
 #@PDQTest
-windows_firewall { "puppet - allow messenger":
+windows_firewall_rule { "puppet - allow messenger":
   ensure    => present,
   direction => "in",
   action    => "allow",

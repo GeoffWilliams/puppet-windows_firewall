@@ -1,5 +1,5 @@
 #@PDQTest
-windows_firewall { "puppet - allow ports 1000-2000":
+windows_firewall_rule { "puppet - allow ports 1000-2000":
   ensure    => present,
   direction => "in",
   action    => "allow",

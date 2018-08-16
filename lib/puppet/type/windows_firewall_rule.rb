@@ -1,6 +1,6 @@
 require 'puppet/parameter/boolean'
 
-Puppet::Type.newtype(:windows_firewall) do
+Puppet::Type.newtype(:windows_firewall_rule) do
   @doc = "Manage Windows Firewall with Puppet"
 
   ensurable do

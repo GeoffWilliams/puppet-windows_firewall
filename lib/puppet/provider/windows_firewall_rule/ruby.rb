@@ -1,4 +1,4 @@
-Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppet::Provider) do
+Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :parent => Puppet::Provider) do
   confine :osfamily => :windows
   mk_resource_methods
   desc "Windows Firewall"
