@@ -13,6 +13,9 @@
 
 Manage the windows firewall with Puppet (netsh).
 
+## Features
+* Create/edit/delete individual firewall rules
+
 ## Usage
 
 ### Listing firewall rules
@@ -142,6 +145,10 @@ windows_firewall { "puppet - allow all":
 }
 ```
 
+## Troubleshooting
+* Try running puppet in debug mode (`--debug`)
+* To reset firewall to default rules: `netsh advfirewall reset`
+
 ## Reference
 [generated documentation](https://rawgit.com/GeoffWilliams/puppet-windows_firewall/master/doc/index.html).
 
@@ -154,6 +161,7 @@ bundle exec puppet strings
 ## Limitations
 * Requires the `netsh advfirewall` command
 * Rule names are lowercased for comparison purposes
+* It is not possible to edit the `grouping` for rules (netsh does not support this)
 * The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
   however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
   individual rules if for each type you wish to allow if you want to limit a rule in this way, eg:
