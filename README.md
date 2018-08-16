@@ -19,7 +19,10 @@ Manage the windows firewall with Puppet (netsh).
 
 ## Usage
 
-### Listing firewall rules
+### windows_firewall_rule
+Manage individual firewall rules
+
+#### Listing firewall rules
 
 The type and provider is able to enumerate the firewall rules existing on the system:
 
@@ -52,7 +55,7 @@ You can limit output to a single rule by passing its name as an argument, eg:
 C:\>puppet resource windows_firewall_rule 'puppet - rule'
 ```
 
-### Ensuring a rule
+#### Ensuring a rule
 
 The basic syntax for ensuring rules is: 
 
@@ -66,7 +69,7 @@ windows_firewall_rule { "name of rule":
 If a rule with the same name but different properties already exists, it will be deleted and re-created to
 ensure it is defined correctly. To delete a rule, set `ensure => absent`.
 
-### Managing ICMP
+#### Managing ICMP
 ```puppet
 windows_firewall_rule { "puppet - all icmpv4":
   ensure    => present,
@@ -89,7 +92,7 @@ windows_firewall_rule { "puppet - allow icmp echo":
 ```
 You need to create one rule for each `protocol_type` `protocol_code` combination (see limitations).
 
-### Managing Ports
+#### Managing Ports
 
 Use the `localport` and `remoteport` properties to set the ports a rule refers to. You can set an
 individual port or a range.
@@ -104,7 +107,7 @@ windows_firewall_rule { "puppet - allow ports 1000-2000":
 }
 ```
 
-### Managing Programs
+#### Managing Programs
 
 ```puppet
 windows_firewall_rule { "puppet - allow messenger":
@@ -115,7 +118,7 @@ windows_firewall_rule { "puppet - allow messenger":
 }
 ```
 
-### Creating rules in specific profiles
+#### Creating rules in specific profiles
 ```puppet
 windows_firewall_rule { "puppet - open port in specific profiles":
   ensure    => present,
@@ -127,7 +130,7 @@ windows_firewall_rule { "puppet - open port in specific profiles":
 }
 ```
 
-### Purging rules
+#### Purging rules
 
 You can choose to purge unmanaged rules from the system (be careful! - this will remove _any_ rule that is not manged by
 Puppet including those created by Windows itself):
@@ -145,6 +148,26 @@ windows_firewall_rule { "puppet - allow all":
   localport => "any",
 }
 ```
+
+### windows_firewall_group
+Enable/Disable named groups of firewall rules
+
+#### Enabling a group of rules
+
+```puppet
+windows_firewall_group { "file and printer sharing":
+  enabled => "yes",
+}
+```
+
+#### Disabling a group of rules
+
+```puppet
+windows_firewall_group { "file and printer sharing":
+  enabled => "no",
+}
+```
+
 
 ## Troubleshooting
 * Try running puppet in debug mode (`--debug`)
