@@ -1,5 +1,6 @@
 # @PDQTest
-windows_firewall { "Puppet - Open a port in specific profiles":
+windows_firewall { "puppet - open port in specific profiles":
+  ensure    => present,
   direction => "in",
   action    => "allow",
   protocol  => "tcp",

@@ -1,4 +1,4 @@
 # @PDQTest
-windows_firewall { "my cool rule":
+windows_firewall { "puppet - delete this rule":
   ensure => absent,
 }

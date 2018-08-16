@@ -1,8 +1,8 @@
 # @PDQTest
-windows_firewall { "my cool rule":
-  ensure => present,
+windows_firewall { "puppet - rule":
+  ensure    => present,
   localport => 9999,
   direction => "in",
-  action => "allow",
-  protocol => "tcp",
+  action    => "allow",
+  protocol  => "tcp",
 }

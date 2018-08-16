@@ -79,8 +79,10 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
         # this will return the _last_ item in the list
         if last_key == :protocol
           line_split = line.strip.split(/\s+/, 2)
-          rule[:protocol_type] = line_split[0]
-          rule[:protocol_code] = line_split[1]
+          if line_split.size == 2
+            rule[:protocol_type] = line_split[0].downcase
+            rule[:protocol_code] = line_split[1].downcase
+          end
         end
       end
     }
@@ -120,7 +122,7 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
       Puppet.notice("(windows_firewall) adding rule '#{@resource[:name]}'")
       args = []
       @resource.properties.reject { |property|
-        property.to_s == "ensure"
+        [:ensure, :protocol_type, :protocol_code].include?(property.name)
       }.each { |property|
         # netsh uses `profiles` when listing but the setter argument for cli is `profile`, all
         # other setter/getter names are symmetrical
@@ -129,7 +131,13 @@ Puppet::Type.type(:windows_firewall).provide(:windows_firewall, :parent => Puppe
         # flatten any arrays to comma deliminted lists (usually for `profile`)
         property_value = (property.value.instance_of?(Array)) ? property.value.join(",") : property.value
 
-        args << "#{property_name}=\"#{property_value}\""
+        # protocol can optionally specify type and code, other properties are set very simply
+        args <<
+            if property_name == "protocol" && @resource[:protocol_type] && resource[:protocol_code]
+              "protocol=\"#{property_value}:#{@resource[:protocol_type]},#{@resource[:protocol_code]}\""
+            else
+              "#{property_name}=\"#{property_value}\""
+            end
       }
       cmd = "#{command(:cmd)} advfirewall firewall add rule name=\"#{@resource[:name]}\" #{args.join(' ')}"
       output = execute(cmd).to_s

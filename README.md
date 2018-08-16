@@ -45,7 +45,7 @@ windows_firewall { 'branchcache content retrieval (http-out)':
 You can limit output to a single rule by passing its name as an argument, eg:
 
 ```shell
-C:\>puppet resource windows_firewall 'my cool rule'
+C:\>puppet resource windows_firewall 'puppet - rule'
 ```
 
 ### Ensuring a rule
@@ -53,7 +53,7 @@ C:\>puppet resource windows_firewall 'my cool rule'
 The basic syntax for ensuring rules is: 
 
 ```puppet
-windows_firewall { "my cool rule":
+windows_firewall { "name of rule":
   ensure => present,
   ...
 }
@@ -64,17 +64,35 @@ ensure it is defined correctly. To delete a rule, set `ensure => absent`.
 
 ### Managing ICMP
 ```puppet
-windows_firewall { "Puppet - All ICMP V4":
+windows_firewall { "puppet - all icmpv4":
+  ensure    => present,
   direction => "in",
   action    => "allow",
   protocol  => "icmpv4",
 }
 ```
 
+You can also create a rule that only allows a specific ICMP type and code:
+```puppet
+windows_firewall { "puppet - allow icmp echo":
+  ensure        => present,
+  direction     => "in",
+  action        => "allow",
+  protocol      => "icmpv4",
+  protocol_type => "8",
+  protocol_code => "any",
+}
+```
+You need to create one rule for each `protocol_type` `protocol_code` combination (see limitations).
+
 ### Managing Ports
 
+Use the `localport` and `remoteport` properties to set the ports a rule refers to. You can set an
+individual port or a range.
+
 ```puppet
-windows_firewall { "Puppet - Open a range of ports":
+windows_firewall { "puppet - allow ports 1000-2000":
+  ensure    => present,
   direction => "in",
   action    => "allow",
   protocol  => "tcp",
@@ -85,7 +103,8 @@ windows_firewall { "Puppet - Open a range of ports":
 ### Managing Programs
 
 ```puppet
-windows_firewall { "Puppet - Allow Messenger":
+windows_firewall { "puppet - allow messenger":
+  ensure    => present,
   direction => "in",
   action    => "allow",
   program   => "C:\\programfiles\\messenger\\msnmsgr.exe",
@@ -93,8 +112,9 @@ windows_firewall { "Puppet - Allow Messenger":
 ```
 
 ### Creating rules in specific profiles
-```shy
-windows_firewall { "Puppet - Open a port in specific profiles":
+```puppet
+windows_firewall { "puppet - open port in specific profiles":
+  ensure    => present,
   direction => "in",
   action    => "allow",
   protocol  => "tcp",
@@ -114,14 +134,15 @@ bundle exec puppet strings
 
 ## Limitations
 * Requires the `netsh advfirewall` command
+* Rule names are lowercased for comparison purposes
 * The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
   however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
   individual rules if for each type you wish to allow if you want to limit a rule in this way, eg:
   
   ```puppet
-  windows_firewall { "Allow ICMP echo":
+  windows_firewall { "allow icmp echo":
     ensure        => present,
-    protocol      => "ICMPv4",
+    protocol      => "icmpv4",
     protocol_type => "8",
     protocol_code => "any",
     action        => "allow",
