@@ -39,7 +39,10 @@ Puppet::Type.newtype(:windows_firewall) do
   end
 
   newproperty(:grouping) do
-    desc "group that the rule belongs to"
+    desc "group that the rule belongs to (read-only)"
+    validate do |value|
+      fail("grouping is readonly: https://social.technet.microsoft.com/Forums/office/en-US/669a8eaf-13d1-4010-b2ac-30c800c4b152/2008r2-firewall-add-rules-to-group-create-new-group")
+    end
   end
 
   newproperty(:localip) do
@@ -121,8 +124,7 @@ Puppet::Type.newtype(:windows_firewall) do
       value.downcase
     end
     validate do |value|
-      # it is not allowed to have a rule called "any"
-      value.downcase != "any"
+      fail("it is not allowed to have a rule called 'any'") if value.downcase == "any"
     end
   end
 
