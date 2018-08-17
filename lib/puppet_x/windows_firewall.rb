@@ -2,6 +2,21 @@ require 'puppet_x'
 module PuppetX
   module WindowsFirewall
 
+    # convert a puppet type key name to the argument to use for `netsh` command
+    def self.global_argument_lookup(key)
+      {
+          :keylifetime       => "mainmode mmkeylifetime",
+          :secmethods        => "mainmode mmsecmethods",
+          :forcedh           => "mainmode mmforcedh",
+          :strongcrlcheck    => "ipsec strongcrlcheck",
+          :saidletimemin     => "ipsec saidletimemin",
+          :defaultexemptions => "ipsec defaultexemptions",
+          :ipsecthroughnat   => "ipsec ipsecthroughnat",
+          :authzcomputergrp  => "ipsec authzcomputergrp",
+          :authzusergrp      => "ipsec authzusergrp",
+      }.fetch(key, key.to_s)
+    end
+
     # create a normalised key name by:
     # 1. lowercasing input
     # 2. converting spaces to underscores
@@ -157,7 +172,24 @@ module PuppetX
           # downcase all values for comparison purposes
           value = line_split[1].strip.downcase
 
-          globals[key] = value
+          case key
+          when :secmethods
+            # secmethods are output with a hypen like this:
+            #   DHGroup2-AES128-SHA1,DHGroup2-3DES-SHA1
+            # but must be input with a colon like this:
+            #   DHGroup2:AES128-SHA1,DHGroup2:3DES-SHA1
+            safe_value = value.split(",").map { |e|
+              e.sub("-", ":")
+            }.join(",")
+          when :strongcrlcheck
+            safe_value = value.split(":")[0]
+          when :defaultexemptions
+            safe_value = value.split(",").sort
+          else
+            safe_value = value.gsub(/min/,"")
+          end
+
+          globals[key] = safe_value
         end
       }
 
