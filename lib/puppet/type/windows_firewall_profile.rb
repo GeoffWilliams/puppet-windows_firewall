@@ -19,7 +19,10 @@ Puppet::Type.newtype(:windows_firewall_profile) do
   end
 
   newproperty(:firewallpolicy) do
-    desc "State of this firewall profile"
+    desc "Configures default inbound and outbound behavior"
+    munge do |value|
+      value.downcase
+    end
   end
 
   newproperty(:localfirewallrules) do
