@@ -16,6 +16,7 @@ Manage the windows firewall with Puppet (netsh).
 ## Features
 * Create/edit/delete individual firewall rules (`windows_firewall_rule`)
 * Enable/disable firewall groups (`windows_firewall_group`)
+* Adjust global settings (`windows_firewall_global`)
 
 ## Usage
 
@@ -168,10 +169,62 @@ windows_firewall_group { "file and printer sharing":
 }
 ```
 
+### windows_firewall_global
+Mange global Windows Firewall settings
+
+Global settings always exist (there is no `ensure`). A single resource with an arbitrary title should be used
+to manage the desired settings, eg:
+
+```puppet
+windows_firewall_global { 'global':
+  authzcomputergrp          => 'none',
+  authzusergrp              => 'none',
+  defaultexemptions         => ['neighbordiscovery','dhcp'],
+  forcedh                   => 'yes',
+  ipsecthroughnat           => 'serverbehindnat',
+  keylifetime               => '485min,0sess',
+  saidletimemin             => '6',
+  secmethods                => 'dhgroup2:aes128-sha1,dhgroup2:3des-sha1',
+  statefulftp               => 'disable',
+  statefulpptp              => 'disable',
+  strongcrlcheck            => '1',
+}
+```
+
+You can use `puppet resource windows_firewall_global` to check what Puppet thinks the current values are:
+
+```shell
+C:\vagrant>puppet resource windows_firewall_global
+windows_firewall_global { 'global':
+  authzcomputergrp          => 'none',
+  authzcomputergrptransport => 'none',
+  authzusergrp              => 'none',
+  authzusergrptransport     => 'none',
+  boottimerulecategory      => 'windows firewall',
+  consecrulecategory        => 'windows firewall',
+  defaultexemptions         => ['dhcp', 'neighbordiscovery'],
+  firewallrulecategory      => 'windows firewall',
+  forcedh                   => 'yes',
+  ipsecthroughnat           => 'serverbehindnat',
+  keylifetime               => '485min,0sess',
+  saidletimemin             => '6',
+  secmethods                => 'dhgroup2:aes128-sha1,dhgroup2:3des-sha1',
+  statefulftp               => 'disable',
+  statefulpptp              => 'disable',
+  stealthrulecategory       => 'windows firewall',
+  strongcrlcheck            => '1',
+}
+```
+
+Note: some properties are read-only.
+
 
 ## Troubleshooting
 * Try running puppet in debug mode (`--debug`)
 * To reset firewall to default rules: `netsh advfirewall reset`
+* Print all firewall rules `netsh advfirewall firewall show rule all verbose`
+* Print firewall global settings `netsh advfirewall show global`
+* Print firewall profile settings `netsh advfirewall show allprofiles`
 
 ## Reference
 [generated documentation](https://rawgit.com/GeoffWilliams/puppet-windows_firewall/master/doc/index.html).
@@ -185,6 +238,8 @@ bundle exec puppet strings
 ## Limitations
 * Requires the `netsh advfirewall` command
 * Rule names are lowercased for comparison purposes
+* Some global firewall settings present differently in `puppet resource windows_firewall_globals` to 
+  `netsh advfirewall show globals` - this is because `netsh` command uses different values to set/get settings
 * Property names match those used by netsh so there is inconsistency in the equivalent puppet
   property names (some names are run-together, others separated by underscores). This is
   deliberate and makes the module code much simpler as names map exactly
