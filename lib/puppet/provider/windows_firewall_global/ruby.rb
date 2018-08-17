@@ -118,8 +118,7 @@ Puppet::Type.type(:windows_firewall_global).provide(:windows_firewall_global, :p
     # `SHOULD`. The setter methods from `mk_resource_methods` (or manually created) won't be called either. You have
     # to inspect @resource instead
     @resource.properties.reject { |property|
-      [ :ensure,
-        :authzusergrptransport,
+      [ :authzusergrptransport,
         :authzcomputergrptransport,
         :boottimerulecategory,
         :firewallrulecategory,

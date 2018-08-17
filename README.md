@@ -223,7 +223,23 @@ windows_firewall_global { 'global':
 
 ### windows_firewall_profile
 
+There are three firewall profiles that the module supports:
+
+* private
+* domain
+* public
+
+Depending on the network the node is connected to, one of these profiles will be active. They map to
+three Puppet resources which cannot be _ensured_:
+
+* `Windows_firewall_profile[private]`
+* `Windows_firewall_profile[domain]`
+* `Windows_firewall_profile[public]`
+
 #### Displaying settings
+
+Use `puppet resource windows_firewall_profile` to see what puppet thinks the settings are:
+
 ```shell
 C:\vagrant>puppet resource windows_firewall_profile
 windows_firewall_profile { 'domain':
@@ -249,9 +265,39 @@ ll.log',
   ...
 ```
 
+Note that some settings are read-only
+
+#### Turning profile firewalls on/off
+
+Use the `state` property on some or all of the profiles:
+
+```puppet
+windows_firewall_profile { 'private':
+  state => 'off',
+}
+
+windows_firewall_profile { ['public', 'domain']:
+  state => 'on',
+}
+```
+
 #### Managing settings
 
+Manage the settings for each of the three profiles you want to manage. To set 
+everything to the same value, use an array for `title`:
 
+```puppet
+windows_firewall_profile { ['domain', 'private']:
+  inboundusernotification    => 'enable',
+  firewallpolicy             => 'allowinbound,allowoutbound',
+  logallowedconnections      => 'enable',
+  logdroppedconnections      => 'enable',
+  maxfilesize                => '4000',
+  remotemanagement           => 'enable',
+  state                      => 'on',
+  unicastresponsetomulticast => 'disable',
+}
+```
 
 ## Troubleshooting
 * Try running puppet in debug mode (`--debug`)
@@ -259,6 +305,7 @@ ll.log',
 * Print all firewall rules `netsh advfirewall firewall show rule all verbose`
 * Print firewall global settings `netsh advfirewall show global`
 * Print firewall profile settings `netsh advfirewall show allprofiles`
+* Use the "Windows Firewall with advanced security" program if you would like a GUI to view/edit firewall status
 * Help on how to [create firewall rules](doc/netsh_firewall_rule.txt) (obtained from: `netsh advfirewall firewall set rule`)
 * Help on how to [change global settings](doc/netsh_global_settings.txt) (obtained from: `netsh advfirewall set global`)
 * Help on how to [change profile settings](doc/netsh_profile_settings.txt) (obtained from: `netsh advfirewall set private`)
@@ -275,6 +322,8 @@ ll.log',
   property names (some names are run-together, others separated by underscores). This is
   deliberate and makes the module code much simpler as names map exactly
 * It is not possible to edit the `grouping` for rules (netsh does not support this)
+* It is not possible to edit the `localfirewallrules` or `localconsecrules` for profiles (this needs
+  corresponding group policy)
 * The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
   however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
   individual rules if for each type you wish to allow if you want to limit a rule in this way, eg:
