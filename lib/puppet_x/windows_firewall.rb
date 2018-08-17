@@ -185,8 +185,12 @@ module PuppetX
             safe_value = value.split(":")[0]
           when :defaultexemptions
             safe_value = value.split(",").sort
+          when :saidletimemin
+            safe_value = value.sub("min","")
+          when :ipsecthroughnat
+            safe_value = value.gsub(" ","")
           else
-            safe_value = value.gsub(/min/,"")
+            safe_value = value
           end
 
           globals[key] = safe_value

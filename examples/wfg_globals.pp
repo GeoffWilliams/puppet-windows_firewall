@@ -5,7 +5,7 @@ windows_firewall_global { 'global':
   defaultexemptions         => ['neighbordiscovery','dhcp'],
   forcedh                   => 'yes',
   ipsecthroughnat           => 'serverbehindnat',
-  # keylifetime               => '480min,0sess',
+  keylifetime               => '485min,0sess',
   saidletimemin             => '6',
   secmethods                => 'dhgroup2:aes128-sha1,dhgroup2:3des-sha1',
   statefulftp               => 'disable',
