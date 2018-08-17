@@ -227,6 +227,9 @@ windows_firewall_global { 'global':
 ```shell
 C:\vagrant>puppet resource windows_firewall_profile
 windows_firewall_profile { 'domain':
+  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewa
+ll.log',
+  firewallpolicy             => 'blockinbound,allowoutbound',
   inboundusernotification    => 'disable',
   localconsecrules           => 'n/a (gpo-store only)',
   localfirewallrules         => 'n/a (gpo-store only)',
@@ -238,6 +241,9 @@ windows_firewall_profile { 'domain':
   unicastresponsetomulticast => 'enable',
 }
 windows_firewall_profile { 'private':
+  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewa
+ll.log',
+  firewallpolicy             => 'blockinbound,allowoutbound',
   inboundusernotification    => 'disable',
   localconsecrules           => 'n/a (gpo-store only)',
   ...
@@ -253,15 +259,12 @@ windows_firewall_profile { 'private':
 * Print all firewall rules `netsh advfirewall firewall show rule all verbose`
 * Print firewall global settings `netsh advfirewall show global`
 * Print firewall profile settings `netsh advfirewall show allprofiles`
+* Help on how to [create firewall rules](doc/netsh_firewall_rule.txt) (obtained from: `netsh advfirewall firewall set rule`)
+* Help on how to [change global settings](doc/netsh_global_settings.txt) (obtained from: `netsh advfirewall set global`)
+* Help on how to [change profile settings](doc/netsh_profile_settings.txt) (obtained from: `netsh advfirewall set private`)
 
 ## Reference
-[generated documentation](https://rawgit.com/GeoffWilliams/puppet-windows_firewall/master/doc/index.html).
-
-Reference documentation is generated directly from source code using [puppet-strings](https://github.com/puppetlabs/puppet-strings).  You may regenerate the documentation by running:
-
-```shell
-bundle exec puppet strings
-```
+...todo
 
 ## Limitations
 * Requires the `netsh advfirewall` command

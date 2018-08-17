@@ -17,6 +17,21 @@ module PuppetX
       }.fetch(key, key.to_s)
     end
 
+    # convert a puppet type key name to the argument to use for `netsh` command
+    def self.profile_argument_lookup(key)
+      {
+        :localfirewallrules         => "settings localfirewallrules",
+        :localconsecrules           => "settings localconsecrules",
+        :inboundusernotification    => "settings inboundusernotification",
+        :remotemanagement           => "settings remotemanagement",
+        :unicastresponsetomulticast => "settings unicastresponsetomulticast",
+        :logallowedconnections      => "logging allowedconnections",
+        :logdroppedconnections      => "logging droppedconnections",
+        :filename                   => "logging filename",
+        :maxfilesize                => "logging maxfilesize",
+     }.fetch(key, key.to_s)
+    end
+
     # create a normalised key name by:
     # 1. lowercasing input
     # 2. converting spaces to underscores
@@ -134,6 +149,9 @@ module PuppetX
           profile_name = line.split(" ")[0].downcase
           first_line = false
         else
+          # nasty hack - "firewall policy" setting contains space and will break our
+          # logic below. Also the setter in `netsh` to use is `firewallpolicy`. Just fix it...
+          line = line.sub("Firewall Policy", "firewallpolicy")
 
           # split each line at most twice by first glob of whitespace
           line_split = line.split(/\s+/, 2)

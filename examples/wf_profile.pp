@@ -1,12 +1,15 @@
 # @PDQTest
+windows_firewall_profile { 'private':
+  state                      => 'off',
+}
+
 windows_firewall_profile { 'domain':
   inboundusernotification    => 'disable',
-  localconsecrules           => 'n/a (gpo-store only)',
-  localfirewallrules         => 'n/a (gpo-store only)',
+  firewallpolicy             => 'allowinbound,allowoutbound',
   logallowedconnections      => 'disable',
   logdroppedconnections      => 'disable',
-  maxfilesize                => '4096',
-  remotemanagement           => 'disable',
+  maxfilesize                => '4000',
+  remotemanagement           => 'enable',
   state                      => 'on',
-  unicastresponsetomulticast => 'enable',
+  unicastresponsetomulticast => 'disable',
 }

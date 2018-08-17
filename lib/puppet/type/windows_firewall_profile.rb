@@ -18,40 +18,56 @@ Puppet::Type.newtype(:windows_firewall_profile) do
     newvalues(:on, :off)
   end
 
-  newproperty(:firewall_policy) do
+  newproperty(:firewallpolicy) do
     desc "State of this firewall profile"
   end
 
   newproperty(:localfirewallrules) do
-    desc "???"
+    desc "Merge local firewall rules with Group Policy rules. Valid when configuring a Group Policy store"
+    newvalues(:enable, :disable, :notconfigured)
+    validate do |value|
+      raise("property is read-only because I'm not sure how to read the current value - pls open a ticket with info if you want this")
+    end
   end
 
   newproperty(:localconsecrules) do
-    desc "???"
+    desc "Merge local connection security rules with Group Policy rules. Valid when configuring a Group Policy store"
+    newvalues(:enable, :disable, :notconfigured)
+    validate do |value|
+      raise("property is read-only because I'm not sure how to read the current value - pls open a ticket with info if you want this")
+    end
   end
 
   newproperty(:inboundusernotification) do
-    desc "???"
+    desc "Notify user when a program listens for inbound connections."
+    newvalues(:enable, :disable, :notconfigured)
   end
 
   newproperty(:remotemanagement) do
-    desc "allow remote management"
+    desc "Allow remote management of Windows Firewall"
+    newvalues(:enable, :disable, :notconfigured)
   end
 
   newproperty(:unicastresponsetomulticast) do
-    desc "respond in unicast to multicast"
+    desc "Control stateful unicast response to multicast."
+    newvalues(:enable, :disable, :notconfigured)
   end
 
   newproperty(:logallowedconnections) do
     desc "log allowed connections"
+    newvalues(:enable, :disable, :notconfigured)
   end
 
   newproperty(:logdroppedconnections) do
     desc "log dropped connections"
+    newvalues(:enable, :disable, :notconfigured)
   end
 
   newproperty(:maxfilesize) do
-    desc "maximum size of log file"
+    desc "maximum size of log file in KB"
   end
 
+  newproperty(:filename) do
+    desc "Name and location of the firewall log"
+  end
 end

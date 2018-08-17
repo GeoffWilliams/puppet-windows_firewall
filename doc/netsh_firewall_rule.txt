@@ -1,0 +1,80 @@
+The number of arguments  provided is not valid. Check help for the correct synta
+x.
+
+Usage: set rule
+      group=<string> | name=<string>
+      [dir=in|out]
+      [profile=public|private|domain|any[,...]]
+      [program=<program path>]
+      [service=service short name|any]
+      [localip=any|<IPv4 address>|<IPv6 address>|<subnet>|<range>|<list>]
+      [remoteip=any|localsubnet|dns|dhcp|wins|defaultgateway|
+         <IPv4 address>|<IPv6 address>|<subnet>|<range>|<list>]
+      [localport=0-65535|<port range>[,...]|RPC|RPC-EPMap|IPHTTPS|any]
+      [remoteport=0-65535|<port range>[,...]|any]
+      [protocol=0-255|icmpv4|icmpv6|icmpv4:type,code|icmpv6:type,code|
+         tcp|udp|any]
+      new
+      [name=<string>]
+      [dir=in|out]
+      [program=<program path>
+      [service=<service short name>|any]
+      [action=allow|block|bypass]
+      [description=<string>]
+      [enable=yes|no]
+      [profile=public|private|domain|any[,...]]
+      [localip=any|<IPv4 address>|<IPv6 address>|<subnet>|<range>|<list>]
+      [remoteip=any|localsubnet|dns|dhcp|wins|defaultgateway|
+         <IPv4 address>|<IPv6 address>|<subnet>|<range>|<list>]
+      [localport=0-65535|RPC|RPC-EPMap|any[,...]]
+      [remoteport=0-65535|any[,...]]
+      [protocol=0-255|icmpv4|icmpv6|icmpv4:type,code|icmpv6:type,code|
+         tcp|udp|any]
+      [interfacetype=wireless|lan|ras|any]
+      [rmtcomputergrp=<SDDL string>]
+      [rmtusrgrp=<SDDL string>]
+      [edge=yes|deferapp|deferuser|no (default=no)]
+      [security=authenticate|authenc|authdynenc|notrequired]
+
+Remarks:
+
+      - Sets a new parameter value on an identified rule. The command fails
+        if the rule does not exist. To create a rule, use the add command.
+      - Values after the new keyword are updated in the rule.  If there are
+        no values, or keyword new is missing, no changes are made.
+      - A group of rules can only be enabled or disabled.
+      - If multiple rules match the criteria, all matching rules will
+        be updated.
+      - Rule name should be unique and cannot be "all".
+      - If a remote computer or user group is specified, security must be
+        authenticate, authenc or authdynenc.
+      - Setting security to authdynenc allows systems to dynamically
+        negotiate the use of encryption for traffic that matches
+        a given Windows Firewall rule. Encryption is negotiated based on
+        existing connection security rule properties. This option
+        enables the ability of a machine to accept the first TCP
+        or UDP packet of an inbound IPsec connection as long as
+        it is secured, but not encrypted, using IPsec.
+        Once the first packet is processed, the server will
+        re-negotiate the connection and upgrade it so that
+        all subsequent communications are fully encrypted.
+      - Authdynenc is valid only when dir=in.
+      - If action=bypass, the remote computer group must be specified when dir=i
+n.
+      - If service=any, the rule applies only to services.
+      - ICMP type or code can be "any".
+      - Edge can only be specified for inbound rules.
+
+Examples:
+
+      Change the remote IP address on a rule called "allow80":
+      netsh advfirewall firewall set rule name="allow80" new
+      remoteip=192.168.0.2
+
+      Enable a group with grouping string "Remote Desktop":
+      netsh advfirewall firewall set rule group="remote desktop" new
+      enable=yes
+
+      Change the localports on the rule "Allow port range" for udp-
+      Set rule name="Allow port range" dir=out protocol=udp localport=5000-5020
+action=allow
