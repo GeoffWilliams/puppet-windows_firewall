@@ -17,6 +17,7 @@ Manage the windows firewall with Puppet (netsh).
 * Create/edit/delete individual firewall rules (`windows_firewall_rule`)
 * Enable/disable firewall groups (`windows_firewall_group`)
 * Adjust global settings (`windows_firewall_global`)
+* Adjust per-profile settings (`windows_firewall_profile`)
 
 ## Usage
 
@@ -170,27 +171,9 @@ windows_firewall_group { "file and printer sharing":
 ```
 
 ### windows_firewall_global
-Mange global Windows Firewall settings
+Global settings always exist (there is no `ensure`). 
 
-Global settings always exist (there is no `ensure`). A single resource with an arbitrary title should be used
-to manage the desired settings, eg:
-
-```puppet
-windows_firewall_global { 'global':
-  authzcomputergrp          => 'none',
-  authzusergrp              => 'none',
-  defaultexemptions         => ['neighbordiscovery','dhcp'],
-  forcedh                   => 'yes',
-  ipsecthroughnat           => 'serverbehindnat',
-  keylifetime               => '485min,0sess',
-  saidletimemin             => '6',
-  secmethods                => 'dhgroup2:aes128-sha1,dhgroup2:3des-sha1',
-  statefulftp               => 'disable',
-  statefulpptp              => 'disable',
-  strongcrlcheck            => '1',
-}
-```
-
+#### Displaying settings
 You can use `puppet resource windows_firewall_global` to check what Puppet thinks the current values are:
 
 ```shell
@@ -218,6 +201,51 @@ windows_firewall_global { 'global':
 
 Note: some properties are read-only.
 
+#### Managing global settings
+
+A single resource with an arbitrary title should be used to manage the desired settings, eg:
+
+```puppet
+windows_firewall_global { 'global':
+  authzcomputergrp          => 'none',
+  authzusergrp              => 'none',
+  defaultexemptions         => ['neighbordiscovery','dhcp'],
+  forcedh                   => 'yes',
+  ipsecthroughnat           => 'serverbehindnat',
+  keylifetime               => '485min,0sess',
+  saidletimemin             => '6',
+  secmethods                => 'dhgroup2:aes128-sha1,dhgroup2:3des-sha1',
+  statefulftp               => 'disable',
+  statefulpptp              => 'disable',
+  strongcrlcheck            => '1',
+}
+```
+
+### windows_firewall_profile
+
+#### Displaying settings
+```shell
+C:\vagrant>puppet resource windows_firewall_profile
+windows_firewall_profile { 'domain':
+  inboundusernotification    => 'disable',
+  localconsecrules           => 'n/a (gpo-store only)',
+  localfirewallrules         => 'n/a (gpo-store only)',
+  logallowedconnections      => 'disable',
+  logdroppedconnections      => 'disable',
+  maxfilesize                => '4096',
+  remotemanagement           => 'disable',
+  state                      => 'on',
+  unicastresponsetomulticast => 'enable',
+}
+windows_firewall_profile { 'private':
+  inboundusernotification    => 'disable',
+  localconsecrules           => 'n/a (gpo-store only)',
+  ...
+```
+
+#### Managing settings
+
+
 
 ## Troubleshooting
 * Try running puppet in debug mode (`--debug`)
@@ -239,7 +267,7 @@ bundle exec puppet strings
 * Requires the `netsh advfirewall` command
 * Rule names are lowercased for comparison purposes
 * Some global firewall settings present differently in `puppet resource windows_firewall_globals` to 
-  `netsh advfirewall show globals` - this is because `netsh` command uses different values to set/get settings
+  `netsh advfirewall show global` - this is because `netsh` command uses different values to set/get settings
 * Property names match those used by netsh so there is inconsistency in the equivalent puppet
   property names (some names are run-together, others separated by underscores). This is
   deliberate and makes the module code much simpler as names map exactly
@@ -257,9 +285,9 @@ bundle exec puppet strings
     action        => "allow",
   }
 
-  windows_firewall_rule { "Allow ICMP time exceeded":
+  windows_firewall_rule { "allow icmp time exceeded":
     ensure        => present,
-    protocol      => "ICMPv4",
+    protocol      => "icmpv4",
     protocol_type => "11",
     protocol_code => "any",
     action        => "allow",
