@@ -1,0 +1,51 @@
+GIT
+  remote: https://github.com/puppetlabs/puppet-strings
+  revision: 00a0f0e16270b0ce89f8d705847a3ec4dab237d2
+  specs:
+    puppet-strings (2.1.0)
+      rgen
+      yard (~> 0.9.5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    facter (2.5.1)
+    facterdb (0.5.2)
+      facter
+      jgrep
+    fast_gettext (1.1.2)
+    hiera (3.4.4)
+    jgrep (1.5.0)
+    json (2.1.0)
+    locale (2.1.2)
+    mcollective-client (2.12.3)
+      json
+      stomp
+      systemu
+    puppet (5.3.5)
+      facter (> 2.0.1, < 4)
+      fast_gettext (~> 1.1.2)
+      hiera (>= 3.2.1, < 4)
+      locale (~> 2.1)
+    rgen (0.8.2)
+    rspec-puppet-facts (1.7.0)
+      facter
+      facterdb (>= 0.3.0)
+      json
+      mcollective-client
+      puppet
+    stomp (1.4.4)
+    systemu (2.6.5)
+    yard (0.9.16)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  facter (= 2.5.1)
+  puppet (= 5.3.5)
+  puppet-strings!
+  rspec-puppet-facts (= 1.7.0)
+
+BUNDLED WITH
+   1.16.1
