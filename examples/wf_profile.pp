@@ -1,4 +1,4 @@
-# @PDQTest
+# @PDQTestWin
 
 windows_firewall_profile { 'domain':
   inboundusernotification    => 'enable',

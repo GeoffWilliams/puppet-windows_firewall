@@ -5,14 +5,27 @@
   "summary": "Manage the windows firewall with Puppet (netsh)",
   "license": "Apache-2.0",
   "source": "https://github.com/GeoffWilliams/puppet-windows_firewall.git",
-  "project_page": null,
-  "issues_url": "https://api.github.com/repos/GeoffWilliams/puppet-windows_firewall/issues{/number}",
+  "project_page": "https://github.com/GeoffWilliams/puppet-windows_firewall",
+  "issues_url": "https://github.com/GeoffWilliams/puppet-windows_firewall/issues",
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
-      "version_requirement": ">= 1.0.0"
+      "version_requirement": "5.1.0"
     }
   ],
-  "data_provider": null,
-  "project_url": "https://github.com/GeoffWilliams/puppet-windows_firewall.git"
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "windows"
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 4.7.0 < 6.0.0"
+    }
+  ],
+  "project_url": "https://github.com/GeoffWilliams/puppet-windows_firewall.git",
+  "pdk-version": "1.7.0",
+  "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git",
+  "template-ref": "1.7.0-0-g57412ed"
 }

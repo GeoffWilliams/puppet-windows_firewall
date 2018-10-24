@@ -1,3 +1,4 @@
+# @PDQTestWin
 resources { "windows_firewall_rule":
   purge => true,
 }

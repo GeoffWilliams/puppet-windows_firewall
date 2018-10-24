@@ -352,3 +352,6 @@ PRs accepted :)
 
 ## Testing
 Manual testing for now 🤮 ... PDQTest needs to support windows
+
+Impossible to test in container :(
+https://social.msdn.microsoft.com/Forums/en-US/3c5be919-765b-4ea6-936b-60f3ac0986aa/windows-firewall-service-is-stopped-on-windows-container

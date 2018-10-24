@@ -1,3 +1,6 @@
+.bundle
+/bin
+convert_report.txt
 .idea
 /pkg
 .yardoc

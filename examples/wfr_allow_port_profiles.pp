@@ -1,4 +1,4 @@
-# @PDQTest
+# @PDQTestWin
 windows_firewall_rule { "puppet - open port in specific profiles":
   ensure    => present,
   direction => "in",

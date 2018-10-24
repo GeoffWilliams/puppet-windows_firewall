@@ -1,4 +1,4 @@
-# @PDQTest
+# @PDQTestWin
 windows_firewall_rule { "puppet - rule":
   ensure    => present,
   localport => 9999,

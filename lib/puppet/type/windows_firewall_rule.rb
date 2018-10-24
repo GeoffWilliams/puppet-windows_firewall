@@ -36,6 +36,14 @@ Puppet::Type.newtype(:windows_firewall_rule) do
   newproperty(:profiles, :array_matching=>:all) do
     desc "Which profile(s) this rule belongs to, use an array to pass more then one"
     newvalues(:domain, :private, :public, :any)
+	
+	# Thanks Gary!
+	def insync?(is)
+	  # `is` will be an unsorted array of STRING, `should` will be an unsorted
+	  # array of SYMBOL. Convert `is` to symbol and sort both for comparison
+	  # to avoid breaking idempotency
+	  is.map { |x| x.to_sym }.sort == should.sort
+    end
   end
 
   newproperty(:grouping) do

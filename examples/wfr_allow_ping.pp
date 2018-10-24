@@ -1,4 +1,4 @@
-#@PDQTest
+#@PDQTestWin
 windows_firewall_rule { "puppet - allow icmp echo":
   ensure        => present,
   direction     => "in",
