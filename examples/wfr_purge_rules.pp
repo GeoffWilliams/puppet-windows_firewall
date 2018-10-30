@@ -4,9 +4,9 @@ resources { "windows_firewall_rule":
 }
 
 windows_firewall_rule { "puppet - allow all":
-  ensure    => present,
-  direction => "in",
-  action    => "allow",
-  protocol  => "tcp",
-  localport => "any",
+  ensure     => present,
+  direction  => "inbound",
+  action     => "allow",
+  protocol   => "tcp",
+  local_port => "any",
 }

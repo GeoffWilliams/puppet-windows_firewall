@@ -118,9 +118,11 @@ The following properties are available in the `windows_firewall_group` type.
 
 ##### `enabled`
 
-Valid values: yes, no
+Valid values: `true`, `false`
 
-Whether the rule group is enabled (Yes or No)
+Whether the rule group is enabled (`true` or `false`)
+
+Default value: true
 
 #### Parameters
 
@@ -222,15 +224,21 @@ The following properties are available in the `windows_firewall_rule` type.
 
 Valid values: present, absent
 
-The basic property that the resource should be in.
+How to ensure this firewall rule (`present` or `absent`)
 
 Default value: present
 
 ##### `enabled`
 
-Valid values: yes, no
+Valid values: `true`, `false`
 
-Whether the rule is enabled (Yes or No)
+Whether the rule is enabled (`true` or `false`)
+
+Default value: true
+
+##### `display_name`
+
+Display name for this rule
 
 ##### `description`
 
@@ -238,53 +246,58 @@ Description of this rule
 
 ##### `direction`
 
-Valid values: in, out
+Valid values: inbound, outbound
 
-Direction the rule applies to (In/Out)
+Direction the rule applies to (`inbound`/`outbound`)
 
-##### `profiles`
+##### `profile`
 
 Valid values: domain, private, public, any
 
 Which profile(s) this rule belongs to, use an array to pass more then one
 
-##### `grouping`
+##### `display_group`
 
 group that the rule belongs to (read-only)
 
-##### `localip`
+##### `local_address`
 
-the local IP the rule targets
+the local IP the rule targets (hostname not allowed)
 
-##### `remoteip`
+##### `remote_address`
 
-the remote IP the rule targets
+the remote IP the rule targets (hostname not allowed)
 
 ##### `protocol`
 
+Valid values: tcp, udp, icmpv4, icmpv6
+
 the protocol the rule targets
 
-##### `protocol_type`
+##### `icmp_type`
 
-protocol type to use (with ICMPv4/ICMPv6)
+Protocol type to use (with ICMPv4/ICMPv6)"
 
-##### `protocol_code`
+Values should be:
+  * Just the type (3)                                                                                                                                                                    ICMP type code: 0 through 255.
+  * ICMP type code pairs: 3:4 (type 3, code 4)
+  * `any`
 
-protocol code to use (with ICMPv4/ICMPv6)
-
-##### `localport`
+##### `local_port`
 
 the local port the rule targets
 
-##### `remoteport`
+##### `remote_port`
 
 the remote port the rule targets
 
-##### `edge_traversal`
+##### `edge_traversal_policy`
 
-Valid values: yes, deferapp, deferuser, no
+Valid values: block, allow, defer_to_user, defer_to_app
 
 Apply rule to encapsulated traffic (?) - see: https://serverfault.com/questions/89824/windows-advanced-firewall-what-does-edge-traversal-mean#89846
+
+Default value: block
 
 ##### `action`
 
@@ -296,21 +309,13 @@ What to do when this rule matches (Accept/Reject)
 
 Path to program this rule applies to
 
-##### `interfacetypes`
+##### `interface_type`
 
-Valid values: wireless, lan, ras, any
+Valid values: any, wired, wireless, remote_access
 
 Interface types this rule applies to
 
-##### `security`
-
-Valid values: authenticate, authenc, authdynenc, authnoencap, notrequired
-
-Security that applies to this rule
-
-##### `rule_source`
-
-Where this rule originated
+Default value: any
 
 #### Parameters
 

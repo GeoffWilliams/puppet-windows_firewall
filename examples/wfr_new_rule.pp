@@ -1,8 +1,8 @@
 # @PDQTestWin
 windows_firewall_rule { "puppet - rule":
-  ensure    => present,
-  localport => 9999,
-  direction => "in",
-  action    => "allow",
-  protocol  => "tcp",
+  ensure     => present,
+  local_port => 9999,
+  direction  => "inbound",
+  action     => "allow",
+  protocol   => "tcp",
 }

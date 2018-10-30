@@ -5,13 +5,12 @@
 
 1. [Description](#description)
 1. [Usage - Configuration options and additional functionality](#usage)
-1. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 1. [Limitations - OS compatibility, etc.](#limitations)
 1. [Development - Guide for contributing to the module](#development)
 
 ## Description
 
-Manage the windows firewall with Puppet (netsh).
+Manage the windows firewall with Puppet (`netsh` and PowerShell as required).
 
 ## Features
 * Create/edit/delete individual firewall rules (`windows_firewall_rule`)
@@ -30,31 +29,47 @@ The type and provider is able to enumerate the firewall rules existing on the sy
 
 ```shell
 C:\>puppet resource windows_firewall_rule
-windows_firewall_rule { 'branchcache content retrieval (http-in)':
-  ensure         => 'present',
-  action         => 'allow',
-  direction      => 'in',
-  edge_traversal => 'no',
-  enabled        => 'no',
-  grouping       => 'branchcache - content retrieval (uses http)',
-  localip        => 'any',
-  localport      => '80',
-  profiles       => ['domain', 'private', 'public'],
-  protocol       => 'tcp',
-  remoteip       => 'any',
-  remoteport     => 'any',
+...
+windows_firewall_rule { '{FCC26AEB-5C68-481A-96DA-8A404F73714C}':
+  ensure                => 'present',
+  action                => 'allow',
+  description           => 'Mail and Calendar',
+  direction             => 'inbound',
+  display_group       b=> 'Mail and Calendar',
+  display_name          => 'Mail and Calendar',
+  edge_traversal_policy => 'allow',
+  enabled               => 'true',
+  icmp_type             => 'any',
+  interface_type        => ['any'],
+  local_address         => 'any',
+  local_port            => 'any',
+  profile               => ['domain', 'private', 'public'],
+  program               => 'Any',
+  protocol              => 'any',
+  remote_address        => 'any',
+  remote_port           => 'any',
 }
-windows_firewall_rule { 'branchcache content retrieval (http-out)':
-  ensure         => 'present',
-  action         => 'allow',
-  direction      => 'out',
-  ... 
 ```
 
 You can limit output to a single rule by passing its name as an argument, eg:
 
 ```shell
-C:\>puppet resource windows_firewall_rule 'puppet - rule'
+C:\>puppet resource windows_firewall_rule winrm
+windows_firewall_rule { 'winrm':
+  ensure                => 'present',
+  action                => 'allow',
+  direction             => 'inbound',
+  display_name          => 'winrm',
+  edge_traversal_policy => 'block',
+  enabled               => 'true',
+  interface_type        => ['any'],
+  local_address         => 'any',
+  local_port            => '5985',
+  profile               => ['domain', 'private', 'public'],
+  protocol              => 'tcp',
+  remote_address        => 'any',
+  remote_port           => 'any',
+}
 ```
 
 #### Ensuring a rule
@@ -75,7 +90,7 @@ ensure it is defined correctly. To delete a rule, set `ensure => absent`.
 ```puppet
 windows_firewall_rule { "puppet - all icmpv4":
   ensure    => present,
-  direction => "in",
+  direction => "inbound",
   action    => "allow",
   protocol  => "icmpv4",
 }
@@ -84,28 +99,27 @@ windows_firewall_rule { "puppet - all icmpv4":
 You can also create a rule that only allows a specific ICMP type and code:
 ```puppet
 windows_firewall_rule { "puppet - allow icmp echo":
-  ensure        => present,
-  direction     => "in",
-  action        => "allow",
-  protocol      => "icmpv4",
-  protocol_type => "8",
-  protocol_code => "any",
+  ensure    => present,
+  direction => "inbound",
+  action    => "allow",
+  protocol  => "icmpv4",
+  icmp_type => "8:10",
 }
 ```
-You need to create one rule for each `protocol_type` `protocol_code` combination (see limitations).
+You need to create one rule for each `icmp_type` value (see limitations).
 
 #### Managing Ports
 
-Use the `localport` and `remoteport` properties to set the ports a rule refers to. You can set an
-individual port or a range.
+Use the `local_port` and `remote_port` properties to set the ports a rule refers
+to. You can set an individual port or a range.
 
 ```puppet
 windows_firewall_rule { "puppet - allow ports 1000-2000":
-  ensure    => present,
-  direction => "in",
-  action    => "allow",
-  protocol  => "tcp",
-  localport => "1000-2000",
+  ensure     => present,
+  direction  => "inbound",
+  action     => "allow",
+  protocol   => "tcp",
+  local_port => "1000-2000",
 }
 ```
 
@@ -114,7 +128,7 @@ windows_firewall_rule { "puppet - allow ports 1000-2000":
 ```puppet
 windows_firewall_rule { "puppet - allow messenger":
   ensure    => present,
-  direction => "in",
+  direction => "inbound",
   action    => "allow",
   program   => "C:\\programfiles\\messenger\\msnmsgr.exe",
 }
@@ -123,19 +137,20 @@ windows_firewall_rule { "puppet - allow messenger":
 #### Creating rules in specific profiles
 ```puppet
 windows_firewall_rule { "puppet - open port in specific profiles":
-  ensure    => present,
-  direction => "in",
-  action    => "allow",
-  protocol  => "tcp",
-  profiles  => ["private", "domain"],
-  localport => "666",
+  ensure     => present,
+  direction  => "inbound",
+  action     => "allow",
+  protocol   => "tcp",
+  profile    => ["private", "domain"],
+  local_port => "666",
 }
 ```
 
 #### Purging rules
 
-You can choose to purge unmanaged rules from the system (be careful! - this will remove _any_ rule that is not manged by
-Puppet including those created by Windows itself):
+You can choose to purge unmanaged rules from the system (be careful! - this will
+remove _any_ rule that is not manged by Puppet including those created by 
+Windows itself):
 
 ```puppet
 resources { "windows_firewall_rule":
@@ -143,30 +158,31 @@ resources { "windows_firewall_rule":
 }
 
 windows_firewall_rule { "puppet - allow all":
-  ensure    => present,
-  direction => "in",
-  action    => "allow",
-  protocol  => "tcp",
-  localport => "any",
+  ensure     => present,
+  direction  => "inbound",
+  action     => "allow",
+  protocol   => "tcp",
+  local_port => "any",
 }
 ```
 
 ### windows_firewall_group
-Enable/Disable named groups of firewall rules
+Enable/Disable named groups of firewall rules. Not that it is only possible to
+enable/disable existing groups, not create or edit them.
 
 #### Enabling a group of rules
 
 ```puppet
-windows_firewall_group { "file and printer sharing":
-  enabled => "yes",
+windows_firewall_group { "File and Printer Sharing":
+  enabled => true,
 }
 ```
 
 #### Disabling a group of rules
 
 ```puppet
-windows_firewall_group { "file and printer sharing":
-  enabled => "no",
+windows_firewall_group { "File and Printer Sharing":
+  enabled => false,
 }
 ```
 
@@ -301,48 +317,55 @@ windows_firewall_profile { ['domain', 'private']:
 
 ## Troubleshooting
 * Try running puppet in debug mode (`--debug`)
-* To reset firewall to default rules: `netsh advfirewall reset`
-* Print all firewall rules `netsh advfirewall firewall show rule all verbose`
+* To reset firewall to default rules: `netsh advfirewall reset` **You need this
+  if your getting `no rules match` errors or errors from global settings**
+* Print all firewall rules using netsh `netsh advfirewall firewall show rule all verbose`
+* Print all firewall rules as read by Puppet `powershell -file lib\ps\windows_firewall\ps-bridge.ps1 show`
 * Print firewall global settings `netsh advfirewall show global`
 * Print firewall profile settings `netsh advfirewall show allprofiles`
 * Use the "Windows Firewall with advanced security" program if you would like a GUI to view/edit firewall status
-* Help on how to [create firewall rules](doc/netsh_firewall_rule.txt) (obtained from: `netsh advfirewall firewall set rule`)
+* Help on how to [create firewall rules](https://docs.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule?view=win10-ps)
 * Help on how to [change global settings](doc/netsh_global_settings.txt) (obtained from: `netsh advfirewall set global`)
 * Help on how to [change profile settings](doc/netsh_profile_settings.txt) (obtained from: `netsh advfirewall set private`)
 
-## Reference
-...todo
-
 ## Limitations
-* Requires the `netsh advfirewall` command
-* Rule names are lowercased for comparison purposes
-* Some global firewall settings present differently in `puppet resource windows_firewall_globals` to 
-  `netsh advfirewall show global` - this is because `netsh` command uses different values to set/get settings
-* Property names match those used by netsh so there is inconsistency in the equivalent puppet
-  property names (some names are run-together, others separated by underscores). This is
-  deliberate and makes the module code much simpler as names map exactly
-* It is not possible to edit the `grouping` for rules (netsh does not support this)
-* It is not possible to edit the `localfirewallrules` or `localconsecrules` for profiles (this needs
-  corresponding group policy)
-* The Windows Advanced Firewall GUI allows multiple individual types to be set for ICMPv4 and ICMPv6
-  however this does not seem to be possible through the `netsh` CLI. Therefore you must create 
-  individual rules if for each type you wish to allow if you want to limit a rule in this way, eg:
+* `netsh` is used to enumerate most rules and is very fast. In some cases 
+  `netsh` will be unable to resolve names for some rules so we fallback to
+  PowerShell instead. This is handled by the `ps-bridge.ps1`
+* Enumerate rules using PowerShell API is very slow. There's not much more that
+  can be done about this short of deleting the offending rules.
+* Deleting (purging) rules is very slow (~5-10 minutes) This is because deleting
+  these rules with PowerShell is slow. There's not much that can be done about
+  this but once unwanted rules are deleted (Windows 10 ships with ~300 rules)
+  future operations will be a lot faster  
+* Requires the `netsh advfirewall` command and PowerShell 
+* Property names match those used by PowerShell (groups, rules) and `netsh` for
+  everything else so there is inconsistency in the equivalent puppet property
+  names and values (some names are run-together, others separated by
+  underscores). This is deliberate and makes the module code much simpler as 
+  names map exactly
+* It is not possible to edit the `grouping` for rules (netsh does not support 
+  this)
+* It is not possible to edit the `localfirewallrules` or `localconsecrules` for
+  profiles (this needs corresponding group policy)
+* The Windows Advanced Firewall GUI allows multiple individual types to be set 
+  for ICMPv4 and ICMPv6 however this does not seem to be possible through the 
+  `netsh` CLI. Therefore you must create individual rules if for each type you 
+  wish to allow if you want to limit a rule in this way, eg:
   
   ```puppet
-  windows_firewall { "allow icmp echo":
-    ensure        => present,
-    protocol      => "icmpv4",
-    protocol_type => "8",
-    protocol_code => "any",
-    action        => "allow",
+  windows_firewall_rule { "allow icmp echo":
+    ensure    => present,
+    protocol  => "icmpv4",
+    icmp_type => "8",
+    action    => "allow",
   }
 
   windows_firewall_rule { "allow icmp time exceeded":
-    ensure        => present,
-    protocol      => "icmpv4",
-    protocol_type => "11",
-    protocol_code => "any",
-    action        => "allow",
+    ensure    => present,
+    protocol  => "icmpv4",
+    icmp_type => "11",
+    action    => "allow",
   }
   ```   
 
@@ -351,7 +374,7 @@ windows_firewall_profile { ['domain', 'private']:
 PRs accepted :)
 
 ## Testing
-Manual testing for now 🤮 ... PDQTest needs to support windows
+Automatic testing using PDQTest 2. Needs to be run in a throw-away VM since its
+impossible to manage the firewall in containerised Windows:
 
-Impossible to test in container :(
 https://social.msdn.microsoft.com/Forums/en-US/3c5be919-765b-4ea6-936b-60f3ac0986aa/windows-firewall-service-is-stopped-on-windows-container

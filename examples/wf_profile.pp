@@ -8,5 +8,5 @@ windows_firewall_profile { 'domain':
   maxfilesize                => '4000',
   remotemanagement           => 'enable',
   state                      => 'on',
-  unicastresponsetomulticast => 'disable',
+  unicastresponsetomulticast => 'enable',
 }

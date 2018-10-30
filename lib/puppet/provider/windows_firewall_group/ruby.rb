@@ -32,7 +32,7 @@ Puppet::Type.type(:windows_firewall_group).provide(:windows_firewall_group, :par
 
 
   def self.instances
-    PuppetX::WindowsFirewall.groups(command(:cmd)).collect { |hash| new(hash) }
+    PuppetX::WindowsFirewall.groups.collect { |hash| new(hash) }
   end
 
   def flush
@@ -40,8 +40,11 @@ Puppet::Type.type(:windows_firewall_group).provide(:windows_firewall_group, :par
     # `SHOULD`. The setter methods from `mk_resource_methods` (or manually created) won't be called either. You have
     # to inspect @resource instead
 
+    # careful its a label not a boolean...
+    netsh_enabled = (@resource[:enabled] == :true)? "yes" : "no"
+
     Puppet.notice("(windows_firewall) group '#{@resource[:name]}' enabled: #{@resource[:enabled]}")
-    cmd = "#{command(:cmd)} advfirewall firewall set rule group=\"#{@resource[:name]}\" new enable=\"#{@resource[:enabled]}\""
+    cmd = "#{command(:cmd)} advfirewall firewall set rule group=\"#{@resource[:name]}\" new enable=\"#{netsh_enabled}\""
     output = execute(cmd).to_s
     Puppet.debug("...#{output}")
   end

@@ -6,7 +6,6 @@ Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :paren
   mk_resource_methods
   desc "Windows Firewall"
 
-  commands :cmd => "netsh"
 
   def self.prefetch(resources)
     instances.each do |prov|
@@ -15,14 +14,7 @@ Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :paren
       end
     end
   end
-
-
-  # def initialize(value={})
-  #   super(value)
-  #   @property_flush = {}
-  # end
-
-
+  
   def exists?
     @property_hash[:ensure] == :present
   end
@@ -36,7 +28,7 @@ Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :paren
   end
 
   def self.instances
-    PuppetX::WindowsFirewall.rules(command(:cmd)).collect { |hash| new(hash) }
+    PuppetX::WindowsFirewall.rules.collect { |hash| new(hash) }
   end
 
   def flush
@@ -47,35 +39,11 @@ Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :paren
     # we are flushing an existing resource to either update it or ensure=>absent it
     # therefore, delete this rule now and create a new one if needed
     if @property_hash[:ensure] == :present
-      Puppet.notice("(windows_firewall) deleting rule '#{@resource[:name]}'")
-      cmd = "#{command(:cmd)} advfirewall firewall delete rule name=\"#{@resource[:name]}\""
-      output = execute(cmd).to_s
+      PuppetX::WindowsFirewall.delete_rule @resource[:name]
     end
 
     if @resource[:ensure] == :present
-      Puppet.notice("(windows_firewall) adding rule '#{@resource[:name]}'")
-      args = []
-      @resource.properties.reject { |property|
-        [:ensure, :protocol_type, :protocol_code].include?(property.name)
-      }.each { |property|
-        # netsh uses `profiles` when listing but the setter argument for cli is `profile`, all
-        # other setter/getter names are symmetrical
-        property_name = (property.name == :profiles)? "profile" : property.name.to_s
-
-        # flatten any arrays to comma deliminted lists (usually for `profile`)
-        property_value = (property.value.instance_of?(Array)) ? property.value.join(",") : property.value
-
-        # protocol can optionally specify type and code, other properties are set very simply
-        args <<
-            if property_name == "protocol" && @resource[:protocol_type] && resource[:protocol_code]
-              "protocol=\"#{property_value}:#{@resource[:protocol_type]},#{@resource[:protocol_code]}\""
-            else
-              "#{property_name}=\"#{property_value}\""
-            end
-      }
-      cmd = "#{command(:cmd)} advfirewall firewall add rule name=\"#{@resource[:name]}\" #{args.join(' ')}"
-      output = execute(cmd).to_s
-      Puppet.debug("...#{output}")
+      PuppetX::WindowsFirewall.create_rule @resource
     end
   end
 

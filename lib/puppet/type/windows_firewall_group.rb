@@ -9,14 +9,21 @@ Puppet::Type.newtype(:windows_firewall_group) do
   newparam(:name) do
     desc "Name of the rule group to enable/disable"
     isnamevar
-    munge do |value|
-      value.downcase
-    end
   end
 
   newproperty(:enabled) do
-    desc "Whether the rule group is enabled (Yes or No)"
-    newvalues(:yes, :no)
+    desc "Whether the rule group is enabled (`true` or `false`)"
+    newvalues(:true, :false)
+    defaultto :true
+
+    def insync?(is)
+      if is == :absent
+        fail("You are trying to add change a non-existent groups - firewall group names are case-sensitive")
+      end
+
+      # MUST still test the insync condition and return status or will always run
+      is == should
+    end
   end
 
 end
