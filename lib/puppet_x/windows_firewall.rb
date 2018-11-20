@@ -69,7 +69,7 @@ module PuppetX
       check_for_script = File.join(Puppet.settings[:libdir], SCRIPT_PATH)
 
       Puppet.debug("Checking for #{SCRIPT_FILE} at #{check_for_script}")
-      script = File.exists? check_for_script ? check_for_script : nil
+      script = File.exists?(check_for_script) ? check_for_script : nil
       script
     end
 

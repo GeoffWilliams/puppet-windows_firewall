@@ -1,6 +1,6 @@
 {
   "name": "geoffwilliams-windows_firewall",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "geoffwilliams",
   "summary": "Manage the windows firewall with Puppet (netsh)",
   "license": "Apache-2.0",
