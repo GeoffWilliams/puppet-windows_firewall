@@ -87,10 +87,18 @@ Puppet::Type.newtype(:windows_firewall_rule) do
 
   newproperty(:local_port) do
     desc "the local port the rule targets"
+
+    def insync?(is)
+      is.downcase == should.downcase
+    end
   end
 
   newproperty(:remote_port) do
     desc "the remote port the rule targets"
+
+    def insync?(is)
+      is.downcase == should.downcase
+    end
   end
 
   newproperty(:edge_traversal_policy) do

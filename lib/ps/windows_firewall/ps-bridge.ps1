@@ -125,6 +125,33 @@ function Get-NormalizedIpAddressRange {
     return $ipAddress
 }
 
+# Local Ports can be one of:
+# * A number (eg: 80)
+# * A range of numbers (eg: 80-100)
+# * "any"
+# * A magic port range, eg RPC - magic names need to be mapped between NETSH and
+#   PS according the table below:
+#
+# | UI | PS | netsh|
+# | --- | --- | --- |
+# | RPC dynamic ports |RPC | RPC |
+# | RPC Endpoint Mapper | RPCEPMap | RPC-EPMap|
+# | IP HTTPS | IPHTTPSIn | IPHTTPS |
+function Get-NormalizedLocalPort {
+    param ($rawLocalPort)
+
+    if ($rawLocalPort -eq "RPC-EPMap") {
+        $localPort = "RPCEPMap"
+    } elseif ($rawLocalPort -eq "IPHTTPS") {
+        $localPort = "IPHTTPSIn"
+    } else {
+        # RPC, numerical port or port range can pass-thru unaltered
+        $localPort = $rawLocalPort
+    }
+
+    return $localPort
+}
+
 # Convert netsh value to powershell value
 function Get-NormalizedValue {
     param(
@@ -143,6 +170,8 @@ function Get-NormalizedValue {
         "Program" = { param($x); $x -replace '\\', '\\' }
         "RemoteAddress" = { param($x); Get-NormalizedIpAddressRange $x}
         "LocalAddress" = { param($x); Get-NormalizedIpAddressRange $x}
+        "LocalPort" = {param($x) ; Get-NormalizedLocalPort $x}
+        "RemotePort" = {param($x) ; $x -replace "IPHTTPS", "IPHTTPSOut"}
     }
 
     if ($normalize.containsKey($keyName)) {
