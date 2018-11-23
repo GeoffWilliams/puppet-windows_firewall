@@ -89,7 +89,7 @@ Puppet::Type.newtype(:windows_firewall_rule) do
     desc "the local port the rule targets"
 
     def insync?(is)
-      is.downcase == should.downcase
+      "#{is}".downcase == "#{should}".downcase
     end
   end
 
@@ -97,7 +97,7 @@ Puppet::Type.newtype(:windows_firewall_rule) do
     desc "the remote port the rule targets"
 
     def insync?(is)
-      is.downcase == should.downcase
+      "#{is}".downcase == "#{should}".downcase
     end
   end
 
