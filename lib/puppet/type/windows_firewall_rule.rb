@@ -120,6 +120,9 @@ Puppet::Type.newtype(:windows_firewall_rule) do
     end
   end
 
+  newproperty(:service) do
+    desc "service names this rule applies to"
+  end
   
   newparam(:name) do
     desc "Name of this rule"

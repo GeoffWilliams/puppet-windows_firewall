@@ -17,13 +17,11 @@
     [String]    $LocalPort,
     [String]    $RemotePort,
     $EdgeTraversalPolicy,
-    $InterfaceType
+    $InterfaceType,
+    $Service
 )
 
 Import-Module NetSecurity
-
-
-# =====
 
 # Lookup select firewall rules using powershell. This is needed to resolve names that are missing
 # from netsh output
@@ -37,6 +35,7 @@ function Get-PSFirewallRules {
         $appf = (Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $_)[0]
         $pf = (Get-NetFirewallPortFilter -AssociatedNetFirewallRule $_)[0]
         $if = (Get-NetFirewallInterfaceTypeFilter -AssociatedNetFirewallRule $_)[0]
+        $sf = (Get-NetFirewallServiceFilter -AssociatedNetFirewallRule $_)[0]
 
         $rules.Add(@{
             Name = $_.Name
@@ -60,6 +59,8 @@ function Get-PSFirewallRules {
             Program = $appf.Program
             # Interface Filter
             InterfaceType = $if.InterfaceType.toString()
+            # Service Filter
+            Service = $sf.Service
         }) > $null
     }
     return $rules
@@ -195,7 +196,7 @@ function Get-NormalizedKey {
         "Rule Name" = "Name"
         "Protocol" = "Protocol"
         "LocalPort" = "LocalPort"
-        "Service" = "Unused_Service"
+        "Service" = "Service"
         "Security" = "Unused_Security"
         "RemoteIP" = "RemoteAddress"
         "Program" =  "Program"
@@ -252,8 +253,6 @@ function Get-ParseChunk {
     return $rule
 }
 
-
-# =====
 
 function show {
     # step 1 - list all rules using `netsh` - the easiest and fastest way to resolve
@@ -383,6 +382,11 @@ function create {
     }
     if ($RemoteAddress) {
         $params.Add("remoteAddress", $RemoteAddress)
+    }
+
+    # Service Filter
+    if ($Service) {
+        $params.Add("Service", $Service)
     }
 
     New-NetFirewallRule @params -ErrorAction Stop
