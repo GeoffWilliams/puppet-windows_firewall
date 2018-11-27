@@ -83,21 +83,22 @@ function Get-ResolveRefs {
     foreach ($ref in $refs) {
         $found = $false
 
-
-        #$RegKey | foreach {
         :inner
         foreach ($r in $RegKey) {
-            #$CurrentKey = (Get-ItemProperty -Path $_.PsPath)
             $CurrentKey = (Get-ItemProperty -Path $r.PsPath)
             if ($currentKey.$ref -ne $null) {
                 $found = $currentKey.$ref
                 break inner
             }
         }
-        if (! $found) {
-            throw "could not resolve $($ref) in registry under $($searchPath)"
-        } else {
+        if ($found) {
             $resolved += $found
+        } else {
+            # sometimes even windows can't resolve names from references - this
+            # even shows up in the `advanced firewall` tool. In this case just
+            # display the raw reference as the name in puppet rather then failing
+            write-verbose "could not resolve $($ref) in registry under $($searchPath)"
+            $resolved += $ref
         }
     }
     return $resolved
