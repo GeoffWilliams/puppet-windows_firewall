@@ -385,11 +385,15 @@ function create {
     if ($IcmpType) {
         $params.Add("IcmpType", $IcmpType)
     }
+    # `$LocalPort` and `$RemotePort` will always be strings since we were
+    # invoked with `powershell -File`, rather then refactor the loader to use
+    # `-Command`, just do a simple string split. The firewall GUI will sort any
+    # passed port ranges but the PS API does not
     if ($LocalPort) {
-        $params.Add("LocalPort", $LocalPort)
+        $params.Add("LocalPort", ($LocalPort -split ','))
     }
     if ($RemotePort) {
-        $params.Add("RemotePort", $RemotePort)
+        $params.Add("RemotePort", ($RemotePort -split ','))
     }
 
     #

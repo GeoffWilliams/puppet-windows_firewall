@@ -51,3 +51,14 @@ windows_firewall_rule { "puppet - open port in specific profiles":
   remote_address => "192.168.1.2",
   interface_type => ["wireless", "wired"],
 }
+
+
+windows_firewall_rule { "puppet - multiple ports":
+  direction      => "inbound",
+  action         => "allow",
+  protocol       => "tcp",
+  local_port     => "443,80,4243,5000-5010",
+  remote_address => "any",
+  remote_port    => "444,81,4244,6000-6010"
+}
+

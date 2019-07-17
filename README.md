@@ -111,7 +111,7 @@ You need to create one rule for each `icmp_type` value (see limitations).
 #### Managing Ports
 
 Use the `local_port` and `remote_port` properties to set the ports a rule refers
-to. You can set an individual port or a range.
+to. You can set an individual ports, a range or combination:
 
 ```puppet
 windows_firewall_rule { "puppet - allow ports 1000-2000":
@@ -119,8 +119,9 @@ windows_firewall_rule { "puppet - allow ports 1000-2000":
   direction  => "inbound",
   action     => "allow",
   protocol   => "tcp",
-  local_port => "1000-2000",
+  local_port => "80,443,4243,5000-5010",
 }
+
 ```
 
 #### Managing Programs
