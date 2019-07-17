@@ -36,7 +36,7 @@ windows_firewall_rule { '{FCC26AEB-5C68-481A-96DA-8A404F73714C}':
   action                => 'allow',
   description           => 'Mail and Calendar',
   direction             => 'inbound',
-  display_group       b=> 'Mail and Calendar',
+  display_group         => 'Mail and Calendar',
   display_name          => 'Mail and Calendar',
   edge_traversal_policy => 'allow',
   enabled               => 'true',
@@ -329,7 +329,7 @@ windows_firewall_profile { ['domain', 'private']:
   if your getting `no rules match` errors or errors from global settings**
 * You may get `missing parameter` errors from Puppet after upgrading the module.
   These can normally be fixed by [removing older versions and restarting Puppet
-  Master]https://github.com/GeoffWilliams/puppet-windows_firewall/issues/7)
+  Master](https://github.com/GeoffWilliams/puppet-windows_firewall/issues/7)
 * Print all firewall rules using netsh 
   `netsh advfirewall firewall show rule all verbose`
 * Print all firewall rules as read by Puppet 
