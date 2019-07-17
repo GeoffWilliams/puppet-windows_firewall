@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/GeoffWilliams/puppet-windows_firewall.svg?branch=master)](https://travis-ci.org/GeoffWilliams/puppet-windows_firewall)
+![Build Status](https://ci.appveyor.com/api/projects/status/github/GeoffWilliams/puppet-windows_firewall?svg=true)
 # windows_firewall
 
 #### Table of Contents
