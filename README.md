@@ -327,6 +327,9 @@ windows_firewall_profile { ['domain', 'private']:
 * Try running puppet in debug mode (`--debug`)
 * To reset firewall to default rules: `netsh advfirewall reset` **You need this
   if your getting `no rules match` errors or errors from global settings**
+* You may get `missing parameter` errors from Puppet after upgrading the module.
+  These can normally be fixed by [removing older versions and restarting Puppet
+  Master]https://github.com/GeoffWilliams/puppet-windows_firewall/issues/7)
 * Print all firewall rules using netsh 
   `netsh advfirewall firewall show rule all verbose`
 * Print all firewall rules as read by Puppet 
