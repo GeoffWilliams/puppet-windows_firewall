@@ -41,6 +41,7 @@ module PuppetX
       check_for_script = File.join(
           Puppet.settings[:environmentpath],
           Puppet.settings[:environment],
+          "modules",
           MOD_DIR,
           SCRIPT_PATH,
           )
