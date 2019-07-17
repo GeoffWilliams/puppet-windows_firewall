@@ -2,5 +2,8 @@
 *.erb eol=lf
 *.pp eol=lf
 *.sh eol=lf
-* text eol=lf
-.* text eol=lf
+*.epp eol=lf
+*.json eol=lf
+*.yaml eol=lf
+*.yml eol=lf
+*.md eol=lf
