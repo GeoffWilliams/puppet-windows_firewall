@@ -15,7 +15,18 @@ Puppet::Type.newtype(:windows_firewall_profile) do
 
   newproperty(:state) do
     desc "State of this firewall profile"
-    newvalues(:on, :off)
+    newvalues(:on, :off, true, false)
+    munge do |value|
+      if value == true
+        munged = :on
+      elsif value == false
+        munged = :off
+      else
+        munged = value
+      end
+
+      munged
+    end
   end
 
   newproperty(:firewallpolicy) do

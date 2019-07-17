@@ -290,13 +290,17 @@ Use the `state` property on some or all of the profiles:
 
 ```puppet
 windows_firewall_profile { 'private':
-  state => 'off',
+  state => false, # off
 }
 
 windows_firewall_profile { ['public', 'domain']:
-  state => 'on',
+  state => true, # on
 }
 ```
+
+The values `true`/`on` or `false`/`off` are acceptable. If supplying data from 
+YAML files in Hiera, `on` and `off` will be implicitly  
+[converted to boolean](https://yaml.org/refcard.html)
 
 #### Managing settings
 
