@@ -25,7 +25,8 @@ Manage individual firewall rules
 
 #### Listing firewall rules
 
-The type and provider is able to enumerate the firewall rules existing on the system:
+The type and provider is able to enumerate the firewall rules existing on the 
+system:
 
 ```shell
 C:\>puppet resource windows_firewall_rule
@@ -83,8 +84,9 @@ windows_firewall_rule { "name of rule":
 }
 ```
 
-If a rule with the same name but different properties already exists, it will be deleted and re-created to
-ensure it is defined correctly. To delete a rule, set `ensure => absent`.
+If a rule with the same name but different properties already exists, it will be
+deleted and re-created to ensure it is defined correctly. To delete a rule, set
+`ensure => absent`.
 
 #### Managing ICMP
 ```puppet
@@ -191,7 +193,8 @@ windows_firewall_group { "File and Printer Sharing":
 Global settings always exist (there is no `ensure`). 
 
 #### Displaying settings
-You can use `puppet resource windows_firewall_global` to check what Puppet thinks the current values are:
+You can use `puppet resource windows_firewall_global` to check what Puppet 
+thinks the current values are:
 
 ```shell
 C:\vagrant>puppet resource windows_firewall_global
@@ -220,7 +223,8 @@ Note: some properties are read-only.
 
 #### Managing global settings
 
-A single resource with an arbitrary title should be used to manage the desired settings, eg:
+A single resource with an arbitrary title should be used to manage the desired
+settings, eg:
 
 ```puppet
 windows_firewall_global { 'global':
@@ -246,8 +250,8 @@ There are three firewall profiles that the module supports:
 * domain
 * public
 
-Depending on the network the node is connected to, one of these profiles will be active. They map to
-three Puppet resources which cannot be _ensured_:
+Depending on the network the node is connected to, one of these profiles will be
+active. They map to three Puppet resources which cannot be _ensured_:
 
 * `Windows_firewall_profile[private]`
 * `Windows_firewall_profile[domain]`
@@ -255,13 +259,13 @@ three Puppet resources which cannot be _ensured_:
 
 #### Displaying settings
 
-Use `puppet resource windows_firewall_profile` to see what puppet thinks the settings are:
+Use `puppet resource windows_firewall_profile` to see what puppet thinks the 
+settings are:
 
 ```shell
 C:\vagrant>puppet resource windows_firewall_profile
 windows_firewall_profile { 'domain':
-  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewa
-ll.log',
+  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewall.log',
   firewallpolicy             => 'blockinbound,allowoutbound',
   inboundusernotification    => 'disable',
   localconsecrules           => 'n/a (gpo-store only)',
@@ -274,8 +278,7 @@ ll.log',
   unicastresponsetomulticast => 'enable',
 }
 windows_firewall_profile { 'private':
-  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewa
-ll.log',
+  filename                   => '%systemroot%\system32\logfiles\firewall\pfirewall.log',
   firewallpolicy             => 'blockinbound,allowoutbound',
   inboundusernotification    => 'disable',
   localconsecrules           => 'n/a (gpo-store only)',
@@ -324,14 +327,21 @@ windows_firewall_profile { ['domain', 'private']:
 * Try running puppet in debug mode (`--debug`)
 * To reset firewall to default rules: `netsh advfirewall reset` **You need this
   if your getting `no rules match` errors or errors from global settings**
-* Print all firewall rules using netsh `netsh advfirewall firewall show rule all verbose`
-* Print all firewall rules as read by Puppet `powershell -file lib\ps\windows_firewall\ps-bridge.ps1 show`
+* Print all firewall rules using netsh 
+  `netsh advfirewall firewall show rule all verbose`
+* Print all firewall rules as read by Puppet 
+  `powershell -file lib\ps\windows_firewall\ps-bridge.ps1 show`
 * Print firewall global settings `netsh advfirewall show global`
 * Print firewall profile settings `netsh advfirewall show allprofiles`
-* Use the "Windows Firewall with advanced security" program if you would like a GUI to view/edit firewall status
-* Help on how to [create firewall rules](https://docs.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule?view=win10-ps)
-* Help on how to [change global settings](doc/netsh_global_settings.txt) (obtained from: `netsh advfirewall set global`)
-* Help on how to [change profile settings](doc/netsh_profile_settings.txt) (obtained from: `netsh advfirewall set private`)
+* Use the "Windows Firewall with advanced security" program if you would like a
+  GUI to view/edit firewall status
+* Help on how to 
+  [create firewall rules](https://docs.microsoft.com/en-us/powershell/module/netsecurity/new-netfirewallrule?view=win10-ps)
+* Help on how to 
+  [change global settings](doc/netsh_global_settings.txt) (obtained from: 
+  `netsh advfirewall set global`)
+* Help on how to [change profile settings](doc/netsh_profile_settings.txt) 
+  (obtained from: `netsh advfirewall set private`)
 
 ## Limitations
 * `netsh` is used to enumerate most rules and is very fast. In some cases 
