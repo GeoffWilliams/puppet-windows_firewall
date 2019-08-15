@@ -50,9 +50,9 @@ function Get-PSFirewallRules {
             # Address Filter
             LocalAddress = $af.LocalAddress.toString()
             RemoteAddress = $af.RemoteAddress.toString()
-            # Port Filter
-            LocalPort = $pf.LocalPort
-            RemotePort = $pf.RemotePort
+            # Port Filter (Newer powershell versions return a hash)
+            LocalPort = if ($pf.RemotePort -is [object]) { $pf.RemotePort["value"] -join "," } else { $pf.RemotePort }
+            RemotePort =if ($pf.LocalPort -is [object]) { $pf.LocalPort["value"]  -join "," } else { $pf.LocalPort }
             Protocol = $pf.Protocol
             IcmpType = $pf.IcmpType
             # Application Filter
