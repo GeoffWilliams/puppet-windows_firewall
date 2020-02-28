@@ -29,7 +29,7 @@ function Get-PSFirewallRules {
     param($filter)
 
     $rules = New-Object System.Collections.ArrayList
-    Show-NetFirewallRule | Where-Object { $_.DisplayName  -in $filter} | ForEach-Object {
+    Show-NetFirewallRule | Where-Object { $_.DisplayName -in $filter } | ForEach-Object {
 
         $af = (Get-NetFirewallAddressFilter -AssociatedNetFirewallRule $_)[0]
         $appf = (Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $_)[0]
@@ -38,30 +38,30 @@ function Get-PSFirewallRules {
         $sf = (Get-NetFirewallServiceFilter -AssociatedNetFirewallRule $_)[0]
 
         $rules.Add(@{
-            Name = $_.Name
-            DisplayName = $_.DisplayName
-            Description = $_.Description
-            Enabled = $_.Enabled.toString()
-            Action = $_.Action.toString()
-            Direction = $_.Direction.toString()
-            EdgeTraversalPolicy = $_.EdgeTraversalPolicy.toString()
-            Profile = $_.Profile.toString()
-            DisplayGroup = $_.DisplayGroup
-            # Address Filter
-            LocalAddress = $af.LocalAddress.toString()
-            RemoteAddress = $af.RemoteAddress.toString()
-            # Port Filter (Newer powershell versions return a hash)
-            LocalPort = if ($pf.RemotePort -is [object]) { $pf.RemotePort["value"] -join "," } else { $pf.RemotePort }
-            RemotePort =if ($pf.LocalPort -is [object]) { $pf.LocalPort["value"]  -join "," } else { $pf.LocalPort }
-            Protocol = $pf.Protocol
-            IcmpType = $pf.IcmpType
-            # Application Filter
-            Program = $appf.Program
-            # Interface Filter
-            InterfaceType = $if.InterfaceType.toString()
-            # Service Filter
-            Service = $sf.Service
-        }) > $null
+                Name                = $_.Name
+                DisplayName         = $_.DisplayName
+                Description         = $_.Description
+                Enabled             = $_.Enabled.toString()
+                Action              = $_.Action.toString()
+                Direction           = $_.Direction.toString()
+                EdgeTraversalPolicy = $_.EdgeTraversalPolicy.toString()
+                Profile             = $_.Profile.toString()
+                DisplayGroup        = $_.DisplayGroup
+                # Address Filter
+                LocalAddress        = if ($af.LocalAddress -is [object]) { $af.LocalAddress -join "," } else { $af.LocalAddress }
+                RemoteAddress       = if ($af.RemoteAddress -is [object]) { $af.RemoteAddress -join "," } else { $af.RemoteAddress }
+                # Port Filter (Newer powershell versions return a hash)
+                LocalPort           = if ($pf.RemotePort -is [object]) { $pf.RemotePort["value"] -join "," } else { $pf.RemotePort }
+                RemotePort          = if ($pf.LocalPort -is [object]) { $pf.LocalPort["value"] -join "," } else { $pf.LocalPort }
+                Protocol            = $pf.Protocol
+                IcmpType            = $pf.IcmpType
+                # Application Filter
+                Program             = $appf.Program
+                # Interface Filter
+                InterfaceType       = $if.InterfaceType.toString()
+                # Service Filter
+                Service             = $sf.Service
+            }) > $null
     }
     return $rules
 }
@@ -93,7 +93,8 @@ function Get-ResolveRefs {
         }
         if ($found) {
             $resolved += $found
-        } else {
+        }
+        else {
             # sometimes even windows can't resolve names from references - this
             # even shows up in the `advanced firewall` tool. In this case just
             # display the raw reference as the name in puppet rather then failing
@@ -110,20 +111,21 @@ function Get-ResolveRefs {
 function Get-NormalizedIpAddressRange {
     param ($rawIpAddress)
 
-
     # any /32 can just be removed...
-
-    if ($rawIpAddress -match "/32") {
-        $fixedIpAddress = $rawIpAddress -replace "/32", ""
-    } else {
-        # see if we are are a zero-length range, eg `192.168.1.1-192.168.1.1`
-        $ipAddressSplit = $rawIpAddress -split "-"
-        if ($ipAddressSplit.length -eq 2 -and ($ipAddressSplit[0] -eq $ipAddressSplit[1])) {
-            $fixedIpAddress = $ipAddressSplit[0]
+    foreach ($addr in $rawIpAddress) {
+        if ($addr -match "/32") {
+            $fixedIpAddress = $addr -replace "/32", ""
         }
+        else {
+            # see if we are are a zero-length range, eg `192.168.1.1-192.168.1.1`
+            $ipAddressSplit = $addr -split "-"
+            if ($ipAddressSplit.length -eq 2 -and ($ipAddressSplit[0] -eq $ipAddressSplit[1])) {
+                $fixedIpAddress = $ipAddressSplit[0]
+            }
+        }
+        $ipAddress += @(if ($fixedIpAddress) { $fixedIpAddress } else { $addr })
     }
-    $ipAddress = if ($fixedIpAddress) {$fixedIpAddress} else {$rawIpAddress}
-    return $ipAddress
+    return $ipAddress -join ","
 }
 
 # Local Ports can be one of:
@@ -143,9 +145,11 @@ function Get-NormalizedLocalPort {
 
     if ($rawLocalPort -eq "RPC-EPMap") {
         $localPort = "RPCEPMap"
-    } elseif ($rawLocalPort -eq "IPHTTPS") {
+    }
+    elseif ($rawLocalPort -eq "IPHTTPS") {
         $localPort = "IPHTTPSIn"
-    } else {
+    }
+    else {
         # RPC, numerical port or port range can pass-thru unaltered
         $localPort = $rawLocalPort
     }
@@ -164,20 +168,21 @@ function Get-NormalizedValue {
     # how it was created. Both of these mean the same (AFAICT) and both of these
     # are coalesced to a regular IP address when using pure powershell...
     $normalize = @{
-        "Enabled" = { param($x); if ($x -eq "Yes") {"True"} else {"False"}}
-        "Direction" = { param($x) ; if ($x -eq "In") {"Inbound"} elseif ($x -eq "Out") {"Outbound"}}
-        "EdgeTraversalPolicy" = { param($x);  if ($x -eq "No") { "Block"} elseif ($x -eq "Yes") {"Allow"} elseif ($x -eq "Defer to application") { "DeferToApp" } elseif ($x -eq "Defer to user") { "DeferToUser" }}
-        "InterfaceType" = {param($x); $x -replace "RAS", "RemoteAccess" -replace "LAN", "Wired" }
-        "Program" = { param($x); $x -replace '\\', '\\' }
-        "RemoteAddress" = { param($x); Get-NormalizedIpAddressRange $x}
-        "LocalAddress" = { param($x); Get-NormalizedIpAddressRange $x}
-        "LocalPort" = {param($x) ; Get-NormalizedLocalPort $x}
-        "RemotePort" = {param($x) ; $x -replace "IPHTTPS", "IPHTTPSOut"}
+        "Enabled"             = { param($x); if ($x -eq "Yes") { "True" } else { "False" } }
+        "Direction"           = { param($x) ; if ($x -eq "In") { "Inbound" } elseif ($x -eq "Out") { "Outbound" } }
+        "EdgeTraversalPolicy" = { param($x); if ($x -eq "No") { "Block" } elseif ($x -eq "Yes") { "Allow" } elseif ($x -eq "Defer to application") { "DeferToApp" } elseif ($x -eq "Defer to user") { "DeferToUser" } }
+        "InterfaceType"       = { param($x); $x -replace "RAS", "RemoteAccess" -replace "LAN", "Wired" }
+        "Program"             = { param($x); $x -replace '\\', '\\' }
+        "RemoteAddress"       = { param($x); Get-NormalizedIpAddressRange ($x -split ",") }
+        "LocalAddress"        = { param($x); Get-NormalizedIpAddressRange ($x -split ",")}
+        "LocalPort"           = { param($x) ; Get-NormalizedLocalPort $x }
+        "RemotePort"          = { param($x) ; $x -replace "IPHTTPS", "IPHTTPSOut" }
     }
 
     if ($normalize.containsKey($keyName)) {
         $value = $normalize[$keyName].invoke($rawValue)
-    } else {
+    }
+    else {
         $value = $rawValue
     }
     return $value
@@ -201,9 +206,11 @@ function Get-NormalizedIcmpType {
 
     if ($type -eq "Any") {
         $icmpType = "Any"
-    } elseif ($code -eq "Any") {
+    }
+    elseif ($code -eq "Any") {
         $icmpType = $type
-    } else {
+    }
+    else {
         $icmpType = "$($type):$($code)"
     }
 
@@ -215,23 +222,23 @@ function Get-NormalizedKey {
     param($keyName)
     $keyNames = @{
         "InterfaceTypes" = "InterfaceType"
-        "Description"= "Description"
-        "Direction" = "Direction"
+        "Description"    = "Description"
+        "Direction"      = "Direction"
         "Edge traversal" = "EdgeTraversalPolicy"
-        "Profiles" =  "Profile"
-        "RemotePort" = "RemotePort"
-        "Grouping" = "DisplayGroup"
-        "Action" = "Action"
-        "LocalIP" = "LocalAddress"
-        "Rule Name" = "Name"
-        "Protocol" = "Protocol"
-        "LocalPort" = "LocalPort"
-        "Service" = "Service"
-        "Security" = "Unused_Security"
-        "RemoteIP" = "RemoteAddress"
-        "Program" =  "Program"
-        "Enabled" = "Enabled"
-        "Rule Source" = "Unused_RuleSource"
+        "Profiles"       = "Profile"
+        "RemotePort"     = "RemotePort"
+        "Grouping"       = "DisplayGroup"
+        "Action"         = "Action"
+        "LocalIP"        = "LocalAddress"
+        "Rule Name"      = "Name"
+        "Protocol"       = "Protocol"
+        "LocalPort"      = "LocalPort"
+        "Service"        = "Service"
+        "Security"       = "Unused_Security"
+        "RemoteIP"       = "RemoteAddress"
+        "Program"        = "Program"
+        "Enabled"        = "Enabled"
+        "Rule Source"    = "Unused_RuleSource"
     }
     $resolved = $keyNames[$keyName]
     if (! $resolved) {
@@ -243,7 +250,7 @@ function Get-NormalizedKey {
 # Parse a chunk of netsh output. Netsh uses a double blank line between output to new record
 function Get-ParseChunk {
     param([String] $chunk)
-    $rule = @{}
+    $rule = @{ }
     $icmpType = $null
     $validParse = $false
 
@@ -253,7 +260,7 @@ function Get-ParseChunk {
             # split at most twice - there will be more then one colon if we have path to a program here
             # eg:
             #   Program: C:\foo.exe
-            $lineSplit = $line -split(":",2)
+            $lineSplit = $line -split (":", 2)
 
 
             if ($lineSplit.length -eq 2) {
@@ -261,12 +268,13 @@ function Get-ParseChunk {
                 $value = Get-NormalizedValue $key $lineSplit[1].Trim()
 
                 $rule[$key] = $value
-            } else {
+            }
+            else {
                 # probably looking at the protocol type/code - we only support ONE of these per rule
                 # since the CLI only lets us set one (although the GUI has no limit). Because of looping
                 # this will return the _last_ item in the list. This lets us gracefully skip over the
                 # header row "Type Code"
-                $lineSplit = $line.Trim() -split("\s+")
+                $lineSplit = $line.Trim() -split ("\s+")
                 if ($lineSplit.length -eq 2) {
                     $icmpType = Get-NormalizedIcmpType $lineSplit[0] $lineSplit[1]
                 }
@@ -292,8 +300,7 @@ function show {
     $rules = New-Object System.Collections.ArrayList
     $s0 = $(get-date)
 
-    ForEach ($chunk in $($netshOutput -split "`r`n`r`n"))
-    {
+    ForEach ($chunk in $($netshOutput -split "`r`n`r`n")) {
         $rule = Get-ParseChunk $chunk
         if ($rule.get_count() -gt 0) {
 
@@ -301,7 +308,8 @@ function show {
                 # additional lookup using powershell required to fully resolve one
                 # or more rules
                 $missingNames.Add($rule["Name"]) > $null
-            } else {
+            }
+            else {
                 $rules.Add($rule) > $null
             }
         }
@@ -325,7 +333,7 @@ function show {
 
 }
 
-function delete{
+function delete {
     write-host "Deleting $($Name)..."
 
     # rules containing square brackets need to be escaped or nothing will match
@@ -338,9 +346,11 @@ function delete{
     # (`-ErrorAction Stop`)
     if (Get-NetFirewallRule -DisplayName $name -erroraction 'silentlycontinue') {
         remove-netfirewallrule -DisplayName $Name
-    } elseif (Get-NetFirewallRule -Name $name -erroraction 'silentlycontinue') {
+    }
+    elseif (Get-NetFirewallRule -Name $name -erroraction 'silentlycontinue') {
         remove-netfirewallrule -Name $Name -ErrorAction Stop
-    } else {
+    }
+    else {
         throw "We were told to delete firewall rule '$($name)' but it does not exist"
     }
 
@@ -350,11 +360,11 @@ function delete{
 function create {
 
     $params = @{
-        Name = $Name;
-        Enabled = $Enabled;
+        Name        = $Name;
+        Enabled     = $Enabled;
         DisplayName = $DisplayName;
         Description = $Description;
-        Action = $Action;
+        Action      = $Action;
     }
 
     #
