@@ -402,7 +402,7 @@ function create {
     if ($Program) {
         $params.Add("Program", $Program)
     }
-    
+
     #
     # Interface filter
     #
@@ -412,10 +412,10 @@ function create {
 
     # Host filter
     if ($LocalAddress) {
-        $params.Add("LocalAddress", $LocalAddress)
+        $params.Add("LocalAddress", ($LocalAddress -split ','))
     }
     if ($RemoteAddress) {
-        $params.Add("remoteAddress", $RemoteAddress)
+        $params.Add("remoteAddress", ($RemoteAddress -split ','))
     }
 
     # Service Filter
