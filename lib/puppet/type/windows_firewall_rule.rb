@@ -58,10 +58,18 @@ Puppet::Type.newtype(:windows_firewall_rule) do
 
   newproperty(:local_address) do
     desc "the local IP the rule targets (hostname not allowed)"
+
+    def insync?(is)
+      "#{is}".downcase == "#{should}".downcase
+    end
   end
 
   newproperty(:remote_address) do
     desc "the remote IP the rule targets (hostname not allowed)"
+
+    def insync?(is)
+      "#{is}".downcase == "#{should}".downcase
+    end
   end
 
   newproperty(:protocol) do
