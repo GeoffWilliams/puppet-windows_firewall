@@ -122,6 +122,7 @@ function Get-NormalizedIpAddressRange {
             if ($ipAddressSplit.length -eq 2 -and ($ipAddressSplit[0] -eq $ipAddressSplit[1])) {
                 $fixedIpAddress = $ipAddressSplit[0]
             }
+        }
     }
     $ipAddress += @(if ($fixedIpAddress) { $fixedIpAddress } else { $addr })
     return $ipAddress
