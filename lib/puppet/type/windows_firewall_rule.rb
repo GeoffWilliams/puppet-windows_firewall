@@ -86,7 +86,7 @@ Puppet::Type.newtype(:windows_firewall_rule) do
     desc <<-EOT
       Protocol type to use (with ICMPv4/ICMPv6)"
 
-      Values should be:               
+      Values should be:
         * Just the type (3)                                                                                                                                                                    ICMP type code: 0 through 255.
         * ICMP type code pairs: 3:4 (type 3, code 4)
         * `any`
@@ -139,7 +139,7 @@ Puppet::Type.newtype(:windows_firewall_rule) do
   newproperty(:service) do
     desc "service names this rule applies to"
   end
-  
+
   newparam(:name) do
     desc "Name of this rule"
     isnamevar
@@ -147,5 +147,5 @@ Puppet::Type.newtype(:windows_firewall_rule) do
       fail("it is not allowed to have a rule called 'any'") if value.downcase == "any"
     end
   end
-  
+
 end

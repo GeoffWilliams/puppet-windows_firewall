@@ -29,7 +29,7 @@ function Get-PSFirewallRules {
     param($filter)
 
     $rules = New-Object System.Collections.ArrayList
-    Show-NetFirewallRule | Where-Object { $_.DisplayName  -in $filter} | ForEach-Object {
+    Show-NetFirewallRule | Where-Object { $_.DisplayName -in $filter } | ForEach-Object {
 
         $af = (Get-NetFirewallAddressFilter -AssociatedNetFirewallRule $_)[0]
         $appf = (Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $_)[0]
@@ -93,7 +93,8 @@ function Get-ResolveRefs {
         }
         if ($found) {
             $resolved += $found
-        } else {
+        }
+        else {
             # sometimes even windows can't resolve names from references - this
             # even shows up in the `advanced firewall` tool. In this case just
             # display the raw reference as the name in puppet rather then failing
@@ -109,7 +110,6 @@ function Get-ResolveRefs {
 # are coalesced to a regular IP address when using pure powershell...
 function Get-NormalizedIpAddressRange {
     param ($rawIpAddress)
-
 
     # any /32 can just be removed...
     foreach ($addr in $rawIpAddress) {
@@ -144,9 +144,11 @@ function Get-NormalizedLocalPort {
 
     if ($rawLocalPort -eq "RPC-EPMap") {
         $localPort = "RPCEPMap"
-    } elseif ($rawLocalPort -eq "IPHTTPS") {
+    }
+    elseif ($rawLocalPort -eq "IPHTTPS") {
         $localPort = "IPHTTPSIn"
-    } else {
+    }
+    else {
         # RPC, numerical port or port range can pass-thru unaltered
         $localPort = $rawLocalPort
     }
@@ -178,7 +180,8 @@ function Get-NormalizedValue {
 
     if ($normalize.containsKey($keyName)) {
         $value = $normalize[$keyName].invoke($rawValue)
-    } else {
+    }
+    else {
         $value = $rawValue
     }
     return $value
@@ -202,9 +205,11 @@ function Get-NormalizedIcmpType {
 
     if ($type -eq "Any") {
         $icmpType = "Any"
-    } elseif ($code -eq "Any") {
+    }
+    elseif ($code -eq "Any") {
         $icmpType = $type
-    } else {
+    }
+    else {
         $icmpType = "$($type):$($code)"
     }
 
@@ -216,23 +221,23 @@ function Get-NormalizedKey {
     param($keyName)
     $keyNames = @{
         "InterfaceTypes" = "InterfaceType"
-        "Description"= "Description"
-        "Direction" = "Direction"
+        "Description"    = "Description"
+        "Direction"      = "Direction"
         "Edge traversal" = "EdgeTraversalPolicy"
-        "Profiles" =  "Profile"
-        "RemotePort" = "RemotePort"
-        "Grouping" = "DisplayGroup"
-        "Action" = "Action"
-        "LocalIP" = "LocalAddress"
-        "Rule Name" = "Name"
-        "Protocol" = "Protocol"
-        "LocalPort" = "LocalPort"
-        "Service" = "Service"
-        "Security" = "Unused_Security"
-        "RemoteIP" = "RemoteAddress"
-        "Program" =  "Program"
-        "Enabled" = "Enabled"
-        "Rule Source" = "Unused_RuleSource"
+        "Profiles"       = "Profile"
+        "RemotePort"     = "RemotePort"
+        "Grouping"       = "DisplayGroup"
+        "Action"         = "Action"
+        "LocalIP"        = "LocalAddress"
+        "Rule Name"      = "Name"
+        "Protocol"       = "Protocol"
+        "LocalPort"      = "LocalPort"
+        "Service"        = "Service"
+        "Security"       = "Unused_Security"
+        "RemoteIP"       = "RemoteAddress"
+        "Program"        = "Program"
+        "Enabled"        = "Enabled"
+        "Rule Source"    = "Unused_RuleSource"
     }
     $resolved = $keyNames[$keyName]
     if (! $resolved) {
@@ -244,7 +249,7 @@ function Get-NormalizedKey {
 # Parse a chunk of netsh output. Netsh uses a double blank line between output to new record
 function Get-ParseChunk {
     param([String] $chunk)
-    $rule = @{}
+    $rule = @{ }
     $icmpType = $null
     $validParse = $false
 
@@ -254,7 +259,7 @@ function Get-ParseChunk {
             # split at most twice - there will be more then one colon if we have path to a program here
             # eg:
             #   Program: C:\foo.exe
-            $lineSplit = $line -split(":",2)
+            $lineSplit = $line -split (":", 2)
 
 
             if ($lineSplit.length -eq 2) {
@@ -262,12 +267,13 @@ function Get-ParseChunk {
                 $value = Get-NormalizedValue $key $lineSplit[1].Trim()
 
                 $rule[$key] = $value
-            } else {
+            }
+            else {
                 # probably looking at the protocol type/code - we only support ONE of these per rule
                 # since the CLI only lets us set one (although the GUI has no limit). Because of looping
                 # this will return the _last_ item in the list. This lets us gracefully skip over the
                 # header row "Type Code"
-                $lineSplit = $line.Trim() -split("\s+")
+                $lineSplit = $line.Trim() -split ("\s+")
                 if ($lineSplit.length -eq 2) {
                     $icmpType = Get-NormalizedIcmpType $lineSplit[0] $lineSplit[1]
                 }
@@ -293,8 +299,7 @@ function show {
     $rules = New-Object System.Collections.ArrayList
     $s0 = $(get-date)
 
-    ForEach ($chunk in $($netshOutput -split "`r`n`r`n"))
-    {
+    ForEach ($chunk in $($netshOutput -split "`r`n`r`n")) {
         $rule = Get-ParseChunk $chunk
         if ($rule.get_count() -gt 0) {
 
@@ -302,7 +307,8 @@ function show {
                 # additional lookup using powershell required to fully resolve one
                 # or more rules
                 $missingNames.Add($rule["Name"]) > $null
-            } else {
+            }
+            else {
                 $rules.Add($rule) > $null
             }
         }
@@ -326,7 +332,7 @@ function show {
 
 }
 
-function delete{
+function delete {
     write-host "Deleting $($Name)..."
 
     # rules containing square brackets need to be escaped or nothing will match
@@ -339,9 +345,11 @@ function delete{
     # (`-ErrorAction Stop`)
     if (Get-NetFirewallRule -DisplayName $name -erroraction 'silentlycontinue') {
         remove-netfirewallrule -DisplayName $Name
-    } elseif (Get-NetFirewallRule -Name $name -erroraction 'silentlycontinue') {
+    }
+    elseif (Get-NetFirewallRule -Name $name -erroraction 'silentlycontinue') {
         remove-netfirewallrule -Name $Name -ErrorAction Stop
-    } else {
+    }
+    else {
         throw "We were told to delete firewall rule '$($name)' but it does not exist"
     }
 
@@ -351,11 +359,11 @@ function delete{
 function create {
 
     $params = @{
-        Name = $Name;
-        Enabled = $Enabled;
+        Name        = $Name;
+        Enabled     = $Enabled;
         DisplayName = $DisplayName;
         Description = $Description;
-        Action = $Action;
+        Action      = $Action;
     }
 
     #
@@ -403,7 +411,7 @@ function create {
     if ($Program) {
         $params.Add("Program", $Program)
     }
-    
+
     #
     # Interface filter
     #
