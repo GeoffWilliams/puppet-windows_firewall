@@ -48,8 +48,8 @@ function Get-PSFirewallRules {
             Profile = $_.Profile.toString()
             DisplayGroup = $_.DisplayGroup
             # Address Filter
-            LocalAddress = $af.LocalAddress.toString()
-            RemoteAddress = $af.RemoteAddress.toString()
+            LocalAddress = if ($af.LocalAddress -is [object]) { $af.LocalAddress -join "," } else { $af.LocalAddress }
+            RemoteAddress = if ($af.RemoteAddress -is [object]) { $af.RemoteAddress -join "," } else { $af.RemoteAddress }
             # Port Filter (Newer powershell versions return a hash)
             LocalPort = if ($pf.RemotePort -is [object]) { $pf.RemotePort["value"] -join "," } else { $pf.RemotePort }
             RemotePort =if ($pf.LocalPort -is [object]) { $pf.LocalPort["value"]  -join "," } else { $pf.LocalPort }
@@ -112,17 +112,19 @@ function Get-NormalizedIpAddressRange {
 
 
     # any /32 can just be removed...
-
-    if ($rawIpAddress -match "/32") {
-        $fixedIpAddress = $rawIpAddress -replace "/32", ""
-    } else {
-        # see if we are are a zero-length range, eg `192.168.1.1-192.168.1.1`
-        $ipAddressSplit = $rawIpAddress -split "-"
-        if ($ipAddressSplit.length -eq 2 -and ($ipAddressSplit[0] -eq $ipAddressSplit[1])) {
-            $fixedIpAddress = $ipAddressSplit[0]
+    foreach ($addr in $rawIpAddress) {
+        if ($addr -match "/32") {
+            $fixedIpAddress = $addr -replace "/32", ""
+        }
+        else {
+            # see if we are are a zero-length range, eg `192.168.1.1-192.168.1.1`
+            $ipAddressSplit = $addr -split "-"
+            if ($ipAddressSplit.length -eq 2 -and ($ipAddressSplit[0] -eq $ipAddressSplit[1])) {
+                $fixedIpAddress = $ipAddressSplit[0]
+            }
         }
     }
-    $ipAddress = if ($fixedIpAddress) {$fixedIpAddress} else {$rawIpAddress}
+    $ipAddress += @(if ($fixedIpAddress) { $fixedIpAddress } else { $addr })
     return $ipAddress
 }
 
@@ -169,8 +171,8 @@ function Get-NormalizedValue {
         "EdgeTraversalPolicy" = { param($x);  if ($x -eq "No") { "Block"} elseif ($x -eq "Yes") {"Allow"} elseif ($x -eq "Defer to application") { "DeferToApp" } elseif ($x -eq "Defer to user") { "DeferToUser" }}
         "InterfaceType" = {param($x); $x -replace "RAS", "RemoteAccess" -replace "LAN", "Wired" }
         "Program" = { param($x); $x -replace '\\', '\\' }
-        "RemoteAddress" = { param($x); Get-NormalizedIpAddressRange $x}
-        "LocalAddress" = { param($x); Get-NormalizedIpAddressRange $x}
+        "RemoteAddress" = { param($x); Get-NormalizedIpAddressRange ($x -split ",")}
+        "LocalAddress" = { param($x); Get-NormalizedIpAddressRange ($x -split ",")}
         "LocalPort" = {param($x) ; Get-NormalizedLocalPort $x}
         "RemotePort" = {param($x) ; $x -replace "IPHTTPS", "IPHTTPSOut"}
     }
@@ -412,10 +414,10 @@ function create {
 
     # Host filter
     if ($LocalAddress) {
-        $params.Add("LocalAddress", $LocalAddress)
+        $params.Add("LocalAddress", ($LocalAddress -split ','))
     }
     if ($RemoteAddress) {
-        $params.Add("remoteAddress", $RemoteAddress)
+        $params.Add("RemoteAddress", ($RemoteAddress -split ','))
     }
 
     # Service Filter
