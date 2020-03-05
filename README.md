@@ -126,6 +126,25 @@ windows_firewall_rule { "puppet - allow ports 1000-2000":
 
 ```
 
+#### Managing local/remote addresses
+
+Use the `local_address` and `remote_address` properties to target rules at
+particular address. You can use individual or multiple addresses:
+
+```puppet
+windows_firewall_rule { "puppet - multiple remote and local addresses":
+  ensure         => present,
+  direction      => "inbound",
+  action         => "allow",
+  protocol       => "tcp",
+  profile        => ["private", "domain"],
+  local_port     => 7777,
+  remote_port    => 7777,
+  local_address  => "192.168.1.1,10.10.10.10",
+  remote_address => "192.168.1.2,192.168.2.11",
+}
+```
+
 #### Managing Programs
 
 ```puppet
@@ -347,6 +366,7 @@ windows_firewall_profile { ['domain', 'private']:
   (obtained from: `netsh advfirewall set private`)
 
 ## Limitations
+* [Will not work on non-English versions of Windows](https://github.com/GeoffWilliams/puppet-windows_firewall/issues/14)
 * `netsh` is used to enumerate most rules and is very fast. In some cases 
   `netsh` will be unable to resolve names for some rules so we fallback to
   PowerShell instead. This is handled by the `ps-bridge.ps1`
