@@ -1,1 +1,0 @@
-powershell -file \testcase\spec\acceptance\setup.ps1

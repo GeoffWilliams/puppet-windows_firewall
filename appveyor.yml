@@ -4,7 +4,6 @@ image: "Visual Studio 2017"
 
 install:
   - "cinst ruby --version 2.4.3.1"
-  - "cinst pdk"
   - set PATH=C:\tools\ruby24\bin;c:\pats\;%PATH%
   - "gem install bundler"
   - "ruby --version"
@@ -16,4 +15,4 @@ build_script:
 
 test_script:
   - ps: ./make.ps1 pdqtestbundle
-  - cd .pdqtest && bundle exec pdqtest --inplace --inplace-enable all
+  - cd .pdqtest && bundle exec pdqtest --inplace --inplace-enable fast
