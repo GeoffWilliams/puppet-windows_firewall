@@ -139,6 +139,6 @@ windows_firewall_rule { "puppet - multiple remote and local addresses":
   profile        => ["private", "domain"],
   local_port     => 7777,
   remote_port    => 7777,
-  local_address  => "192.168.1.1,10.10.10.10",
-  remote_address => "192.168.1.2,192.168.2.11",
+  local_address  => sort("192.168.1.1,10.10.10.10"),
+  remote_address => sort("192.168.1.2,192.168.2.11"),
 }
