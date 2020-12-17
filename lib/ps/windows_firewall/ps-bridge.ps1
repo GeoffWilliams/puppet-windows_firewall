@@ -127,7 +127,9 @@ function Get-NormalizedIpAddressRange {
 		}
 		$ipAddress += @(if ($fixedIpAddress) { $fixedIpAddress } else { $addr })
 	}
-	
+    # Sort IPs address (netsh output doesn't sort them) 
+    $ipAddress = $ipAddress | Sort-Object
+
     return $ipAddress -join ","
 }
 
