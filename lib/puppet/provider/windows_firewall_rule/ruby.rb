@@ -1,5 +1,5 @@
 require 'puppet_x'
-require 'puppet_x/windows_firewall'
+require_relative '../../../puppet_x/windows_firewall'
 
 Puppet::Type.type(:windows_firewall_rule).provide(:windows_firewall_rule, :parent => Puppet::Provider) do
   confine :osfamily => :windows
